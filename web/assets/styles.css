@@ -1675,6 +1675,140 @@ html[data-theme="dark"] .cs-privacy-body code {
 }
 
 /* =========================================================
+ *  LOADING STATE (skeleton + spinner)
+ * ========================================================= */
+.cs-loading {
+  background: var(--cs-card);
+  border: 1px solid var(--cs-border);
+  border-radius: var(--cs-radius);
+  padding: 56px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  min-height: 200px;
+  position: relative;
+  overflow: hidden;
+}
+.cs-loading::after {
+  /* Subtle shimmer */
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    var(--cs-accent-soft) 50%,
+    transparent 80%
+  );
+  opacity: 0;
+  animation: cs-shimmer 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes cs-shimmer {
+  0% { transform: translateX(-100%); opacity: 0; }
+  40% { opacity: 0.6; }
+  100% { transform: translateX(100%); opacity: 0; }
+}
+.cs-spinner {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 3px solid var(--cs-accent-soft);
+  border-top-color: var(--cs-accent);
+  animation: cs-spin 0.9s linear infinite;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+}
+@keyframes cs-spin {
+  to { transform: rotate(360deg); }
+}
+.cs-loading-text {
+  position: relative;
+  z-index: 1;
+}
+.cs-loading-text h3 {
+  margin: 0 0 4px;
+  color: var(--cs-text) !important;
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+}
+.cs-loading-text p {
+  margin: 0;
+  color: var(--cs-muted) !important;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Status line — wraps the HTML returned from review handlers */
+.cs-status-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--cs-muted);
+  padding: 4px 0;
+}
+.cs-status-line b {
+  color: var(--cs-success) !important;
+  font-weight: 700;
+}
+.cs-status-line.cs-status-loading {
+  color: var(--cs-accent) !important;
+  font-weight: 600;
+}
+.cs-status-line.cs-status-done {
+  color: var(--cs-text-2) !important;
+}
+.cs-status-spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  border: 2px solid var(--cs-accent-soft);
+  border-top-color: var(--cs-accent);
+  animation: cs-spin 0.9s linear infinite;
+  flex-shrink: 0;
+}
+
+/* =========================================================
+ *  HIDE GRADIO'S OWN PROGRESS INDICATORS
+ *  Per-component "processing | X.Xs" diamond icon + ETA text
+ *  looks chaotic. We show our own loading state instead.
+ * ========================================================= */
+.progress-text,
+.svelte-progress,
+.eta-bar,
+.progress-bar,
+[class*="progress-text"],
+[class*="progress-bar"],
+[class*="loading-status"],
+.timer,
+[class*="generating"]:not(.cs-loading):not(.cs-spinner),
+.progress {
+  display: none !important;
+}
+
+/* Hide the inline diamond/hourglass that Gradio injects */
+.gradio-container [class*="progress"]:not(.cs-loading):not(.cs-spinner):not(.cs-stat-card) {
+  display: none !important;
+}
+.gradio-container svg[class*="progress"],
+.gradio-container svg[class*="loading"],
+.gradio-container svg[class*="generating"] {
+  display: none !important;
+}
+
+/* But keep the button's loading state intact */
+button.primary[disabled] {
+  opacity: 0.7;
+  cursor: wait !important;
+}
+
+/* =========================================================
  *  HIDE GRADIO BRANDING
  * ========================================================= */
 footer.svelte-1ax1toq,

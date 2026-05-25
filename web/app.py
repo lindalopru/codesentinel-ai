@@ -18,6 +18,7 @@ from codesentinel.review import ReviewEngine
 from codesentinel.schema import ReviewResult, Severity
 from web.components import (
     EMPTY_STATE,
+    LOADING_STATE,
     render_findings_html,
     render_stats_html,
 )
@@ -300,14 +301,35 @@ def _empty_outputs():
 # -------- handlers --------
 
 
+def _empty_stats():
+    return render_stats_html(ReviewResult(file_path="", language="auto"))
+
+
+def _loading_status() -> str:
+    """Loading state HTML — a CSS-animated spinner next to a status string.
+    Both pieces are translatable via data-i18n."""
+    return (
+        "<div class='cs-status-line cs-status-loading'>"
+        "<span class='cs-status-spinner'></span>"
+        "<span data-i18n='status.reviewing'>Revisando código…</span>"
+        "</div>"
+    )
+
+
+def _status_done(text: str) -> str:
+    return f"<div class='cs-status-line cs-status-done'>{text}</div>"
+
+
 def review_uploaded_file(
     file_obj, model: str, language: str, min_sev: str, use_static: bool
 ):
     if file_obj is None:
-        return ("<div class='cs-status'>⬆️ Sube un archivo para empezar.</div>",
-                render_stats_html(ReviewResult(file_path="", language="auto")),
-                None,
-                "Listo.")
+        yield ("<div class='cs-status'>⬆️ Sube un archivo para empezar.</div>",
+               _empty_stats(), None, _status_done("Listo."))
+        return
+    # Loading state — yields immediately so the UI shows a spinner.
+    yield (LOADING_STATE, _empty_stats(), None, _loading_status())
+
     path = Path(file_obj.name)
     engine = _resolve_engine(model)
     result = engine.review_file(path, use_static=use_static)
@@ -316,11 +338,11 @@ def review_uploaded_file(
     result = result.filter_by_severity(Severity(min_sev))
     md_path = _save_md_report(result)
     n = len(result.findings)
-    return (
+    yield (
         render_findings_html(result),
         render_stats_html(result),
         md_path,
-        f"✓ Revisado en {result.duration_s:.1f}s · {n} hallazgo(s).",
+        _status_done(f"<b>✓</b> Revisado en {result.duration_s:.1f}s · {n} hallazgo(s)."),
     )
 
 
@@ -328,10 +350,11 @@ def review_pasted_code(
     code: str, model: str, language: str, min_sev: str, use_static: bool
 ):
     if not code or not code.strip():
-        return ("<div class='cs-status'>📝 Pega código o usa un ejemplo de arriba.</div>",
-                render_stats_html(ReviewResult(file_path="", language="auto")),
-                None,
-                "Listo.")
+        yield ("<div class='cs-status'>📝 Pega código o usa un ejemplo de arriba.</div>",
+               _empty_stats(), None, _status_done("Listo."))
+        return
+    yield (LOADING_STATE, _empty_stats(), None, _loading_status())
+
     lang = language if language and language != "auto" else "python"
     engine = _resolve_engine(model)
     if use_static:
@@ -345,35 +368,35 @@ def review_pasted_code(
     result = result.filter_by_severity(Severity(min_sev))
     md_path = _save_md_report(result)
     n = len(result.findings)
-    return (
+    yield (
         render_findings_html(result),
         render_stats_html(result),
         md_path,
-        f"✓ Revisado en {result.duration_s:.1f}s · {n} hallazgo(s).",
+        _status_done(f"<b>✓</b> Revisado en {result.duration_s:.1f}s · {n} hallazgo(s)."),
     )
 
 
 def review_git_diff_handler(repo_path: str, ref: str, staged: bool, model: str, min_sev: str, use_static: bool):
     if not repo_path or not Path(repo_path).exists():
-        return ("<div class='cs-status'>📁 Provee la ruta a un repositorio git válido.</div>",
-                render_stats_html(ReviewResult(file_path="", language="auto")),
-                None,
-                "Listo.")
+        yield ("<div class='cs-status'>📁 Provee la ruta a un repositorio git válido.</div>",
+               _empty_stats(), None, _status_done("Listo."))
+        return
+    yield (LOADING_STATE, _empty_stats(), None, _loading_status())
+
     engine = _resolve_engine(model)
     results = engine.review_diff(Path(repo_path), ref=ref or "HEAD", staged=staged, use_static=use_static)
     if not results:
-        return ("<div class='cs-status'>✨ No hay cambios revisables en el diff.</div>",
-                render_stats_html(ReviewResult(file_path="", language="auto")),
-                None,
-                "Sin cambios.")
+        yield ("<div class='cs-status'>✨ No hay cambios revisables en el diff.</div>",
+               _empty_stats(), None, _status_done("Sin cambios."))
+        return
     results = [r.filter_by_severity(Severity(min_sev)) for r in results]
     md_path = _save_md_report(results)
     total = sum(len(r.findings) for r in results)
-    return (
+    yield (
         render_findings_html(results),
         render_stats_html(results),
         md_path,
-        f"✓ {len(results)} archivo(s) · {total} hallazgo(s).",
+        _status_done(f"<b>✓</b> {len(results)} archivo(s) · {total} hallazgo(s)."),
     )
 
 
@@ -466,6 +489,13 @@ def build_ui() -> gr.Blocks:
 
     /* finding card chrome */
     'finding.suggestion':     { es: 'Sugerencia:',              en: 'Suggestion:' },
+
+    /* loading + status */
+    'status.ready':           { es: 'Listo.',                   en: 'Ready.' },
+    'status.reviewing':       { es: 'Revisando código…',        en: 'Reviewing code…' },
+    'loading.title':          { es: 'Analizando código…',       en: 'Analyzing code…' },
+    'loading.body':           { es: 'El modelo está revisando tu código. Esto puede tardar 10–60 segundos.',
+                                en: 'The model is analyzing your code. This may take 10–60 seconds.' },
   };
 
   /* =================================================================
@@ -752,8 +782,10 @@ def build_ui() -> gr.Blocks:
                 gr.HTML(ABOUT_HTML)
 
         # ---------- Status bar ----------
-        status = gr.Markdown(
-            "Listo.",
+        # HTML (not Markdown) so we can inject a CSS-animated spinner
+        # during the loading state.
+        status = gr.HTML(
+            value="<div class='cs-status-line' data-i18n='status.ready'>Listo.</div>",
             elem_id="cs-status-md",
         )
 
@@ -802,26 +834,28 @@ def build_ui() -> gr.Blocks:
         sample_java.click(lambda: _read_sample("java"), outputs=[code_in, lang_dd])
 
         # Main review handlers
+        # show_progress="hidden" — we render our own clean loading state
+        # via the generator yield in each handler.
         paste_btn.click(
             review_pasted_code,
             inputs=[code_in, model_dd, lang_dd, min_sev_dd, static_cb],
             outputs=[findings_out, counts_out, report_dl, status],
             queue=True,
-            show_progress="full",
+            show_progress="hidden",
         )
         file_btn.click(
             review_uploaded_file,
             inputs=[file_in, model_dd, lang_dd, min_sev_dd, static_cb],
             outputs=[findings_out, counts_out, report_dl, status],
             queue=True,
-            show_progress="full",
+            show_progress="hidden",
         )
         diff_btn.click(
             review_git_diff_handler,
             inputs=[repo_in, ref_in, staged_cb, model_dd, min_sev_dd, static_cb],
             outputs=[findings_out, counts_out, report_dl, status],
             queue=True,
-            show_progress="full",
+            show_progress="hidden",
         )
 
     return demo

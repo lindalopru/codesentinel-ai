@@ -95,6 +95,16 @@ EMPTY_STATE = """
 </div>
 """
 
+LOADING_STATE = """
+<div class='cs-loading'>
+  <div class='cs-spinner'></div>
+  <div class='cs-loading-text'>
+    <h3 data-i18n='loading.title'>Analizando código…</h3>
+    <p data-i18n='loading.body'>El modelo está revisando tu código. Esto puede tardar 10–60 segundos.</p>
+  </div>
+</div>
+"""
+
 NO_FINDINGS = """
 <div class='cs-success'>
   <div class='ico'>
