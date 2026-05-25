@@ -497,9 +497,9 @@ html[data-theme="dark"] .cs-hero::before {
   border: none !important;
 }
 
-/* THEME TOGGLE BUTTON */
-.cs-theme-toggle {
-  width: 34px;
+/* THEME + LANG TOGGLE BUTTONS */
+.cs-theme-toggle,
+.cs-lang-toggle {
   height: 34px;
   border-radius: 999px;
   background: var(--cs-card);
@@ -513,25 +513,48 @@ html[data-theme="dark"] .cs-hero::before {
   color: var(--cs-muted) !important;
   padding: 0;
 }
-.cs-theme-toggle:hover {
+.cs-theme-toggle { width: 34px; }
+.cs-lang-toggle  {
+  padding: 0 12px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  gap: 6px;
+}
+.cs-theme-toggle:hover,
+.cs-lang-toggle:hover {
   border-color: var(--cs-accent);
   color: var(--cs-accent) !important;
   transform: translateY(-1px);
   box-shadow: var(--cs-shadow);
 }
-.cs-theme-toggle svg {
-  width: 16px;
-  height: 16px;
+.cs-theme-toggle svg,
+.cs-lang-toggle svg {
+  width: 14px;
+  height: 14px;
   stroke: currentColor;
   stroke-width: 2;
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
+.cs-theme-toggle svg { width: 16px; height: 16px; }
 .cs-theme-toggle .icon-sun { display: none; }
 .cs-theme-toggle .icon-moon { display: block; }
 html[data-theme="dark"] .cs-theme-toggle .icon-sun { display: block; }
 html[data-theme="dark"] .cs-theme-toggle .icon-moon { display: none; }
+
+/* Show only the active language label inside the lang toggle */
+.cs-lang-toggle .lang-es { display: none; }
+.cs-lang-toggle .lang-en { display: inline; }
+html[data-lang="es"] .cs-lang-toggle .lang-en { display: none; }
+html[data-lang="es"] .cs-lang-toggle .lang-es { display: inline; }
+
+/* Generic i18n visibility — show only the active language's content */
+[data-i18n-only="es"] { display: none; }
+[data-i18n-only="en"] { display: initial; }
+html[data-lang="es"] [data-i18n-only="es"] { display: initial; }
+html[data-lang="es"] [data-i18n-only="en"] { display: none; }
 
 /* =========================================================
  *  TABS
@@ -642,7 +665,7 @@ button.secondary:hover {
   align-items: center;
 }
 .cs-samples-row::before {
-  content: "Prueba con un ejemplo:";
+  content: var(--cs-samples-label, "Prueba con un ejemplo:");
   font-size: 12px;
   font-weight: 500;
   color: var(--cs-muted) !important;

@@ -55,7 +55,10 @@ def _finding_card(f: Finding, language: str) -> str:
     suggestion_html = ""
     if f.suggestion.strip():
         suggestion_html = (
-            f"<div class='finding-suggestion'><b>Sugerencia:</b> {html.escape(f.suggestion)}</div>"
+            "<div class='finding-suggestion'>"
+            "<b data-i18n='finding.suggestion'>Sugerencia:</b> "
+            f"{html.escape(f.suggestion)}"
+            "</div>"
         )
     snippet_html = ""
     if f.code_snippet.strip():
@@ -87,8 +90,8 @@ EMPTY_STATE = """
       <path d='m21 21-4.3-4.3'/>
     </svg>
   </div>
-  <h3>Sin análisis aún</h3>
-  <p>Pega código, sube un archivo o prueba un ejemplo para empezar.</p>
+  <h3 data-i18n='empty.title'>Sin análisis aún</h3>
+  <p data-i18n='empty.body'>Pega código, sube un archivo o prueba un ejemplo para empezar.</p>
 </div>
 """
 
@@ -100,8 +103,8 @@ NO_FINDINGS = """
     </svg>
   </div>
   <div>
-    <h3>Sin hallazgos</h3>
-    <p>El modelo no detectó problemas en el código revisado.</p>
+    <h3 data-i18n='no_findings.title'>Sin hallazgos</h3>
+    <p data-i18n='no_findings.body'>El modelo no detectó problemas en el código revisado.</p>
   </div>
 </div>
 """
