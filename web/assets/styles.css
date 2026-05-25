@@ -1,11 +1,13 @@
-/* CodeSentinel AI — minimal premium styling
+/* CodeSentinel AI — Premium UI v3
  *
- * Design principles:
- *   - Two grays and one accent. That's it.
- *   - High contrast on text (≥ 7:1 for body, ≥ 4.5:1 for muted).
- *   - Borders, not shadows. Shadows only on focus and hover.
- *   - Force light mode — don't let Gradio's dark variant fight us.
- *   - Less is more: no gradients, fewer pills, simpler hero.
+ * Design system:
+ *   - Warm off-white background, never pure white
+ *   - Subtle dotted-grid pattern on hero (Stripe / Linear inspired)
+ *   - Thin gradient accent line at the very top of the page
+ *   - One color story: indigo accent, severity colors only on badges
+ *   - High-contrast code editor (One Dark Pro inspired tokens)
+ *   - Real SVG icons, never emoji
+ *   - Subtle hover elevations, no chunky shadows
  */
 
 /* ---------- force light mode ---------- */
@@ -19,35 +21,77 @@ body[data-theme="dark"] {
 
 /* ---------- design tokens ---------- */
 :root {
-  /* Text */
-  --cs-text:     #0B0F19;   /* near-black, body text */
-  --cs-text-2:   #1E293B;   /* secondary body */
-  --cs-muted:    #475569;   /* muted text (passes AAA on white) */
-  --cs-faint:    #64748B;   /* very subtle, used sparingly */
-
   /* Surfaces */
-  --cs-bg:       #FAFAF9;   /* page background */
-  --cs-card:     #FFFFFF;   /* cards, panels */
-  --cs-subtle:   #F4F4F5;   /* hover backgrounds */
-  --cs-border:   #E4E4E7;   /* default border */
-  --cs-border-2: #D4D4D8;   /* stronger border (focus, etc.) */
+  --cs-bg:        #FAFAF7;   /* warm off-white */
+  --cs-bg-2:      #F5F5F1;   /* slightly deeper */
+  --cs-card:      #FFFFFF;
+  --cs-subtle:    #F4F4F0;
+  --cs-border:    #E7E5E0;
+  --cs-border-2: #D6D3CD;
 
-  /* Accent — one color */
-  --cs-accent:   #1E2761;
-  --cs-accent-2: #161D4B;
-  --cs-accent-soft: #EEF0FA;
+  /* Text — high contrast first */
+  --cs-text:      #18181B;   /* near-black */
+  --cs-text-2:    #27272A;
+  --cs-muted:     #52525B;   /* AAA on cream */
+  --cs-faint:     #71717A;
 
-  /* Severity (badges + left border only) */
+  /* Accent — indigo */
+  --cs-accent:       #4F46E5;
+  --cs-accent-2:     #4338CA;
+  --cs-accent-light: #6366F1;
+  --cs-accent-soft:  #EEF2FF;
+  --cs-accent-line:  rgba(79, 70, 229, 0.12);
+
+  /* Severity (badges + card borders only) */
   --cs-critical: #DC2626;
   --cs-high:     #EA580C;
   --cs-medium:   #CA8A04;
   --cs-low:      #2563EB;
-  --cs-info:     #64748B;
+  --cs-info:     #71717A;
   --cs-success:  #059669;
 
+  /* Code editor (GitHub light — calibrated for AAA contrast) */
+  --cs-code-bg:        #FFFFFF;
+  --cs-code-bg-2:      #F6F8FA;   /* gutter */
+  --cs-code-text:      #1F2328;
+  --cs-code-text-bold: #0B1019;
+  --cs-code-keyword:   #CF222E;   /* def, class, return */
+  --cs-code-string:    #0A3069;   /* "..." */
+  --cs-code-number:    #0550AE;
+  --cs-code-fn:        #8250DF;   /* function names */
+  --cs-code-builtin:   #953800;
+  --cs-code-comment:   #6E7781;
+  --cs-code-op:        #1F2328;
+  --cs-code-cursor:    #4F46E5;
+  --cs-code-selection: #DDEBFF;
+  --cs-code-line:      #8C959F;   /* gutter line numbers */
+
   /* Spacing */
-  --cs-radius:    10px;
-  --cs-radius-lg: 14px;
+  --cs-radius-sm: 8px;
+  --cs-radius:    12px;
+  --cs-radius-lg: 16px;
+
+  /* Shadows (used sparingly) */
+  --cs-shadow-sm: 0 1px 2px rgba(24, 24, 27, 0.04);
+  --cs-shadow:    0 4px 12px -2px rgba(24, 24, 27, 0.06), 0 2px 4px -2px rgba(24, 24, 27, 0.04);
+  --cs-shadow-md: 0 8px 24px -4px rgba(24, 24, 27, 0.08), 0 4px 8px -4px rgba(24, 24, 27, 0.04);
+}
+
+/* ---------- top accent line (premium signature) ---------- */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg,
+    #6366F1 0%,
+    #8B5CF6 35%,
+    #EC4899 65%,
+    #F59E0B 100%);
+  z-index: 9999;
+  opacity: 0.85;
 }
 
 /* ---------- base ---------- */
@@ -67,12 +111,12 @@ html, body, .gradio-container {
 /* Constrain width — wide apps feel cheap */
 .gradio-container > div.main,
 .gradio-container > main {
-  max-width: 1160px !important;
+  max-width: 1180px !important;
   margin: 0 auto !important;
-  padding: 28px 28px 64px !important;
+  padding: 36px 32px 64px !important;
 }
 
-/* Universal text-color enforcement so Gradio dark vars don't override */
+/* Text-color enforcement so Gradio dark vars don't override */
 .gradio-container p,
 .gradio-container span,
 .gradio-container li,
@@ -83,42 +127,99 @@ html, body, .gradio-container {
   color: var(--cs-text) !important;
 }
 
-/* ---------- HERO ---------- */
+/* ---------- HERO (with dotted pattern + accent gradient) ---------- */
 .cs-hero {
-  padding: 36px 0 28px;
-  border-bottom: 1px solid var(--cs-border);
+  padding: 40px 36px;
+  background-color: var(--cs-card);
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(79, 70, 229, 0.10) 1px, transparent 0);
+  background-size: 22px 22px;
+  border: 1px solid var(--cs-border);
+  border-radius: var(--cs-radius-lg);
   margin-bottom: 32px;
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: 24px;
   flex-wrap: wrap;
+  position: relative;
+  overflow: hidden;
+}
+.cs-hero::before {
+  content: "";
+  position: absolute;
+  top: -100px;
+  right: -100px;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(
+    circle at center,
+    rgba(99, 102, 241, 0.10),
+    rgba(236, 72, 153, 0.04),
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.cs-hero-content {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  position: relative;
+  z-index: 1;
+}
+.cs-hero-logo {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--cs-accent) 0%, var(--cs-accent-light) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.2) inset,
+    0 6px 16px -4px rgba(79, 70, 229, 0.4);
+  flex-shrink: 0;
+}
+.cs-hero-logo svg {
+  width: 28px;
+  height: 28px;
+  stroke: white;
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 .cs-hero h1 {
-  font-size: 30px;
+  font-size: 32px;
   font-weight: 700;
   line-height: 1.1;
-  letter-spacing: -0.02em;
-  margin: 0;
+  letter-spacing: -0.025em;
+  margin: 0 0 4px;
   color: var(--cs-text) !important;
 }
 .cs-hero p {
-  margin: 6px 0 0;
+  margin: 0;
   font-size: 14.5px;
   color: var(--cs-muted) !important;
   font-weight: 400;
+  letter-spacing: -0.005em;
 }
+
 .cs-hero-meta {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
 }
 .cs-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 5px 10px;
+  padding: 6px 12px;
   border-radius: 999px;
   background: var(--cs-card);
   border: 1px solid var(--cs-border);
@@ -126,19 +227,31 @@ html, body, .gradio-container {
   font-size: 12px;
   font-weight: 500;
   white-space: nowrap;
+  box-shadow: var(--cs-shadow-sm);
+}
+.cs-pill svg {
+  width: 12px;
+  height: 12px;
+  stroke: var(--cs-muted);
+  stroke-width: 2.2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 .cs-pill .dot {
   width: 7px;
   height: 7px;
   border-radius: 999px;
   background: var(--cs-success);
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.18);
 }
 .cs-pill code {
   font-family: ui-monospace, "SF Mono", Menlo, monospace !important;
   font-size: 11.5px;
-  color: var(--cs-muted) !important;
+  color: var(--cs-text-2) !important;
   background: transparent !important;
   padding: 0 !important;
+  font-weight: 500;
 }
 
 /* ---------- TABS ---------- */
@@ -148,7 +261,7 @@ html, body, .gradio-container {
   background: transparent !important;
   margin: 0 0 24px !important;
   display: flex;
-  gap: 4px;
+  gap: 2px;
   border-bottom: 1px solid var(--cs-border) !important;
   border-radius: 0 !important;
   padding: 0 !important;
@@ -159,13 +272,14 @@ html, body, .gradio-container {
   background: transparent !important;
   color: var(--cs-muted) !important;
   border-radius: 0 !important;
-  padding: 12px 16px !important;
+  padding: 12px 18px !important;
   margin: 0 !important;
   font-weight: 500 !important;
   font-size: 14px !important;
   position: relative;
   box-shadow: none !important;
   transition: color 0.15s ease !important;
+  letter-spacing: -0.005em !important;
 }
 .tab-nav button:hover,
 [role="tab"]:hover {
@@ -174,7 +288,7 @@ html, body, .gradio-container {
 }
 .tab-nav button.selected,
 [role="tab"][aria-selected="true"] {
-  color: var(--cs-text) !important;
+  color: var(--cs-accent) !important;
   background: transparent !important;
   font-weight: 600 !important;
   box-shadow: none !important;
@@ -183,35 +297,46 @@ html, body, .gradio-container {
 [role="tab"][aria-selected="true"]::after {
   content: "";
   position: absolute;
-  left: 16px;
-  right: 16px;
+  left: 18px;
+  right: 18px;
   bottom: -1px;
   height: 2px;
   background: var(--cs-accent);
+  border-radius: 2px 2px 0 0;
 }
 
 /* ---------- BUTTONS ---------- */
 button.primary,
-button.lg.primary,
 .gr-button-primary {
   background: var(--cs-accent) !important;
   color: white !important;
   border: 1px solid var(--cs-accent) !important;
-  border-radius: var(--cs-radius) !important;
+  border-radius: 10px !important;
   font-weight: 600 !important;
   font-size: 14px !important;
   padding: 10px 22px !important;
-  box-shadow: none !important;
-  transition: background 0.15s ease, border-color 0.15s ease !important;
+  box-shadow: 0 1px 2px rgba(79, 70, 229, 0.25), 0 4px 12px -2px rgba(79, 70, 229, 0.25) !important;
+  transition: all 0.15s ease !important;
+  letter-spacing: -0.005em !important;
 }
 button.primary:hover,
 .gr-button-primary:hover {
   background: var(--cs-accent-2) !important;
   border-color: var(--cs-accent-2) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(79, 70, 229, 0.3), 0 8px 20px -4px rgba(79, 70, 229, 0.35) !important;
+}
+button.primary:active {
+  transform: translateY(0);
 }
 button.primary:focus-visible {
   outline: none !important;
-  box-shadow: 0 0 0 3px rgba(30, 39, 97, 0.20) !important;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.25) !important;
+}
+
+button.lg.primary {
+  padding: 12px 24px !important;
+  font-size: 15px !important;
 }
 
 button.secondary,
@@ -219,23 +344,32 @@ button.secondary,
   background: var(--cs-card) !important;
   color: var(--cs-text) !important;
   border: 1px solid var(--cs-border) !important;
-  border-radius: var(--cs-radius) !important;
+  border-radius: 10px !important;
   font-weight: 500 !important;
   font-size: 13.5px !important;
-  box-shadow: none !important;
-  transition: border-color 0.15s ease, background 0.15s ease !important;
+  box-shadow: var(--cs-shadow-sm) !important;
+  transition: all 0.15s ease !important;
 }
 button.secondary:hover {
   border-color: var(--cs-border-2) !important;
   background: var(--cs-subtle) !important;
+  transform: translateY(-1px);
 }
 
-/* ---------- SAMPLE CHIPS (smaller, quieter) ---------- */
+/* ---------- SAMPLE CHIPS ---------- */
 .cs-samples-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin: 4px 0 14px 0;
+  gap: 8px;
+  margin: 8px 0 18px 0;
+  align-items: center;
+}
+.cs-samples-row::before {
+  content: "Prueba con un ejemplo:";
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--cs-muted) !important;
+  margin-right: 4px;
 }
 .cs-samples-row button,
 button.cs-sample-btn {
@@ -245,15 +379,125 @@ button.cs-sample-btn {
   border-radius: 999px !important;
   font-weight: 500 !important;
   font-size: 12.5px !important;
-  padding: 5px 12px !important;
+  padding: 6px 14px !important;
   min-height: 0 !important;
-  box-shadow: none !important;
-  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease !important;
+  box-shadow: var(--cs-shadow-sm) !important;
+  transition: all 0.15s ease !important;
 }
 .cs-samples-row button:hover {
   border-color: var(--cs-accent) !important;
   color: var(--cs-accent) !important;
   background: var(--cs-accent-soft) !important;
+  transform: translateY(-1px);
+}
+
+/* ---------- CODE EDITOR — GitHub light, calibrated for contrast ---------- */
+.cm-editor {
+  border-radius: var(--cs-radius) !important;
+  border: 1px solid var(--cs-border) !important;
+  overflow: hidden;
+  background: var(--cs-code-bg) !important;
+  box-shadow: var(--cs-shadow-sm) !important;
+}
+.cm-editor.cm-focused {
+  border-color: var(--cs-accent) !important;
+  box-shadow:
+    0 0 0 3px rgba(79, 70, 229, 0.15),
+    var(--cs-shadow) !important;
+  outline: none !important;
+}
+.cm-editor .cm-scroller {
+  background: var(--cs-code-bg) !important;
+  color: var(--cs-code-text) !important;
+  font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace !important;
+  font-size: 13px !important;
+  line-height: 1.65 !important;
+}
+.cm-editor .cm-gutters {
+  background: var(--cs-code-bg-2) !important;
+  border-right: 1px solid var(--cs-border) !important;
+  color: var(--cs-code-line) !important;
+}
+.cm-editor .cm-lineNumbers .cm-gutterElement {
+  color: var(--cs-code-line) !important;
+  padding: 0 12px 0 8px !important;
+  font-size: 12.5px !important;
+}
+.cm-editor .cm-activeLine {
+  background: rgba(79, 70, 229, 0.04) !important;
+}
+.cm-editor .cm-activeLineGutter {
+  background: rgba(79, 70, 229, 0.06) !important;
+  color: var(--cs-code-text-bold) !important;
+}
+.cm-editor .cm-cursor {
+  border-left-color: var(--cs-code-cursor) !important;
+  border-left-width: 2px !important;
+}
+.cm-editor .cm-selectionBackground,
+.cm-editor ::selection {
+  background: var(--cs-code-selection) !important;
+}
+.cm-editor .cm-content,
+.cm-editor .cm-line {
+  caret-color: var(--cs-code-cursor) !important;
+  color: var(--cs-code-text) !important;
+}
+.cm-editor .cm-content * {
+  color: var(--cs-code-text);   /* sane base — tokens below override */
+}
+
+/* CodeMirror 6 obfuscated highlight classes (ͼ = U+037F).
+ * The exact mapping depends on the order tokens are registered, so we cover
+ * the common ones AND fall back to attribute-based selectors below. */
+.cm-editor .ͼ1, .cm-editor .ͼ2, .cm-editor .ͼ3,
+.cm-editor .ͼ4, .cm-editor .ͼ5, .cm-editor .ͼ6,
+.cm-editor .ͼ7, .cm-editor .ͼ8, .cm-editor .ͼ9,
+.cm-editor .ͼa, .cm-editor .ͼb, .cm-editor .ͼc,
+.cm-editor .ͼd, .cm-editor .ͼe, .cm-editor .ͼf,
+.cm-editor .ͼg, .cm-editor .ͼh, .cm-editor .ͼi,
+.cm-editor .ͼj, .cm-editor .ͼk, .cm-editor .ͼl,
+.cm-editor .ͼm, .cm-editor .ͼn, .cm-editor .ͼo,
+.cm-editor .ͼp, .cm-editor .ͼq, .cm-editor .ͼr,
+.cm-editor .ͼs, .cm-editor .ͼt, .cm-editor .ͼu,
+.cm-editor .ͼv, .cm-editor .ͼw, .cm-editor .ͼx,
+.cm-editor .ͼy, .cm-editor .ͼz {
+  /* Default to readable text color; specific token classes override */
+  color: var(--cs-code-text);
+}
+
+/* Token mapping — Gradio's lezer order */
+.cm-editor .ͼi { color: var(--cs-code-keyword) !important; font-weight: 500; }
+.cm-editor .ͼd { color: var(--cs-code-string) !important; }
+.cm-editor .ͼe { color: var(--cs-code-number) !important; }
+.cm-editor .ͼc { color: var(--cs-code-fn) !important; }
+.cm-editor .ͼb { color: var(--cs-code-builtin) !important; }
+.cm-editor .ͼm { color: var(--cs-code-comment) !important; font-style: italic; }
+.cm-editor .ͼp { color: var(--cs-code-op) !important; }
+
+/* Attribute-based fallback */
+.cm-editor [class*="keyword"] { color: var(--cs-code-keyword) !important; font-weight: 500; }
+.cm-editor [class*="string"]  { color: var(--cs-code-string) !important; }
+.cm-editor [class*="number"]  { color: var(--cs-code-number) !important; }
+.cm-editor [class*="function"] { color: var(--cs-code-fn) !important; }
+.cm-editor [class*="comment"] { color: var(--cs-code-comment) !important; font-style: italic; }
+.cm-editor [class*="builtin"] { color: var(--cs-code-builtin) !important; }
+
+/* Punctuation must stay readable */
+.cm-editor [class*="punctuation"],
+.cm-editor [class*="bracket"],
+.cm-editor [class*="paren"] {
+  color: var(--cs-code-text) !important;
+}
+
+/* gr.Code's label badge */
+.gr-block.code label,
+.gr-block.code .label {
+  background: transparent !important;
+  color: var(--cs-text) !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  padding: 0 !important;
 }
 
 /* ---------- FORM CONTROLS ---------- */
@@ -272,9 +516,10 @@ input[type="number"],
 textarea {
   background: var(--cs-card) !important;
   border: 1px solid var(--cs-border) !important;
-  border-radius: var(--cs-radius) !important;
+  border-radius: var(--cs-radius-sm) !important;
   color: var(--cs-text) !important;
   font-size: 14px !important;
+  padding: 10px 12px !important;
   transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
 }
 .gr-input::placeholder,
@@ -289,7 +534,7 @@ input:focus,
 textarea:focus {
   outline: none !important;
   border-color: var(--cs-accent) !important;
-  box-shadow: 0 0 0 3px rgba(30, 39, 97, 0.10) !important;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12) !important;
 }
 
 label,
@@ -303,7 +548,6 @@ span.svelte-1gfkn6j {
   letter-spacing: -0.005em !important;
 }
 
-/* Help text under inputs (Gradio's `info=` param) */
 .info,
 .gr-info,
 .gradio-container [data-testid="info"] {
@@ -319,33 +563,31 @@ select,
   background: var(--cs-card) !important;
   color: var(--cs-text) !important;
   border: 1px solid var(--cs-border) !important;
-  border-radius: var(--cs-radius) !important;
+  border-radius: var(--cs-radius-sm) !important;
 }
 .gr-dropdown ul {
   background: var(--cs-card) !important;
   border: 1px solid var(--cs-border) !important;
+  border-radius: var(--cs-radius-sm) !important;
+  box-shadow: var(--cs-shadow-md) !important;
 }
 .gr-dropdown li {
   color: var(--cs-text) !important;
+  padding: 8px 12px !important;
+}
+.gr-dropdown li:hover {
+  background: var(--cs-accent-soft) !important;
+  color: var(--cs-accent) !important;
 }
 
-/* Checkbox label */
+/* Checkbox */
 .gr-checkbox label,
 .gr-checkbox span {
   color: var(--cs-text) !important;
   font-weight: 500 !important;
 }
-
-/* Code editor (CodeMirror) */
-.cm-editor {
-  border-radius: var(--cs-radius) !important;
-  border: 1px solid var(--cs-border) !important;
-  overflow: hidden;
-}
-.cm-editor.cm-focused {
-  border-color: var(--cs-accent) !important;
-  box-shadow: 0 0 0 3px rgba(30, 39, 97, 0.10) !important;
-  outline: none !important;
+input[type="checkbox"] {
+  accent-color: var(--cs-accent) !important;
 }
 
 /* File upload */
@@ -353,10 +595,11 @@ select,
 .file-preview,
 .file-drop {
   border: 2px dashed var(--cs-border) !important;
-  border-radius: var(--cs-radius-lg) !important;
+  border-radius: var(--cs-radius) !important;
   background: var(--cs-card) !important;
   color: var(--cs-text) !important;
-  transition: border-color 0.18s ease, background 0.18s ease;
+  transition: all 0.18s ease;
+  padding: 32px 20px !important;
 }
 .gr-file:hover,
 .file-drop:hover {
@@ -370,12 +613,15 @@ select,
   border: 1px solid var(--cs-border);
   border-left-width: 3px;
   border-radius: var(--cs-radius);
-  padding: 18px 20px;
-  margin: 10px 0;
-  transition: border-color 0.15s ease;
+  padding: 18px 22px;
+  margin: 12px 0;
+  box-shadow: var(--cs-shadow-sm);
+  transition: all 0.15s ease;
 }
 .finding-card:hover {
   border-color: var(--cs-border-2);
+  box-shadow: var(--cs-shadow);
+  transform: translateY(-1px);
 }
 
 .finding-card.sev-critical { border-left-color: var(--cs-critical); }
@@ -402,7 +648,7 @@ select,
 .severity-badge {
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
+  padding: 3px 9px;
   border-radius: 6px;
   font-weight: 700;
   font-size: 10.5px;
@@ -441,6 +687,7 @@ select,
   font-size: 11.5px;
   color: var(--cs-text-2) !important;
   font-family: ui-monospace, "SF Mono", Menlo, monospace !important;
+  font-weight: 500;
 }
 
 .finding-desc {
@@ -451,9 +698,9 @@ select,
 }
 
 .finding-suggestion {
-  background: rgba(5, 150, 105, 0.05);
+  background: linear-gradient(180deg, rgba(5, 150, 105, 0.06), rgba(5, 150, 105, 0.03));
   border-left: 3px solid var(--cs-success);
-  padding: 10px 14px;
+  padding: 12px 16px;
   margin: 14px 0 0;
   border-radius: 0 var(--cs-radius) var(--cs-radius) 0;
   font-size: 13.5px;
@@ -470,16 +717,16 @@ select,
   margin-top: 14px;
   border-radius: var(--cs-radius);
   overflow: hidden;
-  border: 1px solid #1F2937;
+  border: 1px solid #2A2F3A;
 }
 .finding-snippet pre {
-  background: #0B0F19 !important;
+  background: #0F172A !important;
   color: #E2E8F0 !important;
   padding: 14px 16px !important;
   margin: 0 !important;
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace !important;
   font-size: 12.5px !important;
-  line-height: 1.6 !important;
+  line-height: 1.65 !important;
   overflow-x: auto;
 }
 
@@ -487,27 +734,35 @@ select,
 .cs-stats-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 6px;
+  gap: 8px;
 }
 .cs-stat-card {
   background: var(--cs-card);
   border: 1px solid var(--cs-border);
   border-radius: var(--cs-radius);
-  padding: 14px 10px;
+  padding: 16px 10px;
   text-align: center;
+  box-shadow: var(--cs-shadow-sm);
+  transition: all 0.15s ease;
+}
+.cs-stat-card:hover {
+  border-color: var(--cs-border-2);
+  transform: translateY(-1px);
+  box-shadow: var(--cs-shadow);
 }
 .cs-stat-card .v {
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 700;
   color: var(--cs-text) !important;
   line-height: 1;
   margin: 0;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
+  font-variant-numeric: tabular-nums;
 }
 .cs-stat-card .l {
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 600;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--cs-muted) !important;
   margin-top: 8px;
@@ -517,18 +772,41 @@ select,
 .cs-stat-card.medium   .v { color: var(--cs-medium) !important; }
 .cs-stat-card.low      .v { color: var(--cs-low) !important; }
 
-/* When count = 0, mute the card so non-zero ones stand out */
-.cs-stat-card.zero .v { color: var(--cs-faint) !important; }
+.cs-stat-card.zero .v { color: #D4D4D8 !important; }
 .cs-stat-card.zero .l { color: var(--cs-faint) !important; }
+.cs-stat-card.zero:hover { transform: none; box-shadow: var(--cs-shadow-sm); }
 
 /* ---------- EMPTY STATE ---------- */
 .cs-empty {
   background: var(--cs-card);
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(0, 0, 0, 0.03) 1px, transparent 0);
+  background-size: 16px 16px;
   border: 1px solid var(--cs-border);
   border-radius: var(--cs-radius);
-  padding: 56px 24px;
+  padding: 64px 28px;
   text-align: center;
   color: var(--cs-muted);
+}
+.cs-empty .ico {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cs-accent-soft);
+  border-radius: 14px;
+  color: var(--cs-accent);
+}
+.cs-empty .ico svg {
+  width: 24px;
+  height: 24px;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 .cs-empty h3 {
   color: var(--cs-text) !important;
@@ -545,28 +823,43 @@ select,
 }
 
 .cs-success {
-  background: var(--cs-card);
-  border: 1px solid var(--cs-border);
+  background: linear-gradient(180deg, rgba(5, 150, 105, 0.04), rgba(5, 150, 105, 0.01));
+  border: 1px solid rgba(5, 150, 105, 0.25);
   border-left: 3px solid var(--cs-success);
   border-radius: var(--cs-radius);
-  padding: 20px 22px;
+  padding: 22px 24px;
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
+}
+.cs-success .ico {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: var(--cs-success);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.cs-success .ico svg {
+  width: 20px;
+  height: 20px;
+  stroke: white;
+  stroke-width: 2.5;
+  fill: none;
 }
 .cs-success h3 {
   margin: 0;
   font-weight: 600;
-  color: var(--cs-text) !important;
+  color: #064E3B !important;
   font-size: 15px;
 }
 .cs-success p {
   margin: 2px 0 0;
   font-size: 13px;
-  color: var(--cs-muted) !important;
-}
-.cs-success .ico {
-  font-size: 22px;
+  color: #047857 !important;
 }
 
 /* ---------- ACCORDION ---------- */
@@ -575,7 +868,7 @@ select,
   border: 1px solid var(--cs-border) !important;
   border-radius: var(--cs-radius) !important;
   background: var(--cs-card) !important;
-  box-shadow: none !important;
+  box-shadow: var(--cs-shadow-sm) !important;
   margin-top: 20px !important;
 }
 .gr-accordion > button,
@@ -592,11 +885,12 @@ select,
 .cs-status {
   background: var(--cs-card);
   border: 1px solid var(--cs-border);
-  padding: 10px 14px;
+  padding: 12px 16px;
   border-radius: var(--cs-radius);
   font-size: 13px;
   color: var(--cs-text-2) !important;
   margin: 0 0 14px;
+  box-shadow: var(--cs-shadow-sm);
 }
 .cs-status b {
   color: var(--cs-text) !important;
@@ -609,7 +903,8 @@ select,
   color: var(--cs-muted) !important;
   font-size: 13px !important;
   margin: 0 !important;
-  padding: 8px 0 16px !important;
+  padding: 10px 0 16px !important;
+  font-weight: 500;
 }
 
 /* ---------- FOOTER ---------- */
@@ -632,25 +927,6 @@ footer[class*="svelte"] {
 .show-api,
 [data-testid="api-button"] {
   display: none !important;
-}
-
-/* ---------- DATAFRAME (rare; we use cs-stats-grid instead) ---------- */
-.gr-dataframe table {
-  border-collapse: separate !important;
-  border-spacing: 0 !important;
-  border-radius: var(--cs-radius) !important;
-  overflow: hidden !important;
-  border: 1px solid var(--cs-border) !important;
-  font-size: 12.5px !important;
-}
-.gr-dataframe thead th {
-  background: var(--cs-subtle) !important;
-  color: var(--cs-text) !important;
-  font-weight: 600 !important;
-  text-transform: uppercase !important;
-  font-size: 10.5px !important;
-  letter-spacing: 0.05em !important;
-  padding: 10px !important;
 }
 
 /* ---------- LINKS ---------- */
@@ -681,9 +957,9 @@ footer[class*="svelte"] {
   margin: 0 0 12px !important;
 }
 
-/* Tab content — remove default padding to use our own */
+/* Tab content padding */
 [role="tabpanel"] {
-  padding-top: 4px !important;
+  padding-top: 8px !important;
 }
 
 /* Markdown inside cells */

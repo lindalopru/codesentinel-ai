@@ -59,13 +59,30 @@ def _read_sample(key: str) -> tuple[str, str]:
 
 HERO_HTML = f"""
 <div class='cs-hero'>
-  <div>
-    <h1>CodeSentinel AI</h1>
-    <p>Revisor de código con IA, ejecutándose 100% en tu Mac.</p>
+  <div class='cs-hero-content'>
+    <div class='cs-hero-logo'>
+      <svg viewBox='0 0 24 24'>
+        <path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'/>
+        <path d='m9 12 2 2 4-4'/>
+      </svg>
+    </div>
+    <div>
+      <h1>CodeSentinel AI</h1>
+      <p>Revisor de código con IA, ejecutándose 100% en tu Mac.</p>
+    </div>
   </div>
   <div class='cs-hero-meta'>
-    <span class='cs-pill'><span class='dot'></span> Local</span>
-    <span class='cs-pill'><code>{_settings.ollama_model.split(':')[0]}</code></span>
+    <span class='cs-pill'>
+      <span class='dot'></span>
+      Local
+    </span>
+    <span class='cs-pill'>
+      <svg viewBox='0 0 24 24'>
+        <polyline points='16 18 22 12 16 6'/>
+        <polyline points='8 6 2 12 8 18'/>
+      </svg>
+      <code>{_settings.ollama_model.split(':')[0]}</code>
+    </span>
   </div>
 </div>
 """

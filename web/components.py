@@ -81,14 +81,24 @@ def _finding_card(f: Finding, language: str) -> str:
 
 EMPTY_STATE = """
 <div class='cs-empty'>
+  <div class='ico'>
+    <svg viewBox='0 0 24 24'>
+      <circle cx='11' cy='11' r='8'/>
+      <path d='m21 21-4.3-4.3'/>
+    </svg>
+  </div>
   <h3>Sin análisis aún</h3>
-  <p>Pega código, sube un archivo, o prueba un ejemplo para empezar.</p>
+  <p>Pega código, sube un archivo o prueba un ejemplo para empezar.</p>
 </div>
 """
 
 NO_FINDINGS = """
 <div class='cs-success'>
-  <span class='ico'>✓</span>
+  <div class='ico'>
+    <svg viewBox='0 0 24 24'>
+      <polyline points='20 6 9 17 4 12'/>
+    </svg>
+  </div>
   <div>
     <h3>Sin hallazgos</h3>
     <p>El modelo no detectó problemas en el código revisado.</p>
