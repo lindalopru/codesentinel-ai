@@ -10,13 +10,124 @@
  *   - Subtle hover elevations, no chunky shadows
  */
 
-/* ---------- force light mode ---------- */
+/* ---------- force light mode + override ALL Gradio CSS variables ---------- */
 :root,
 .gradio-container,
 .gradio-container.dark,
 body.dark,
 body[data-theme="dark"] {
   color-scheme: light !important;
+
+  /* Surfaces / backgrounds */
+  --background-fill-primary:       #FAFAF7 !important;
+  --background-fill-secondary:     #F5F5F1 !important;
+  --body-background-fill:          #FAFAF7 !important;
+  --block-background-fill:         #FFFFFF !important;
+  --block-border-color:            #E7E5E0 !important;
+  --panel-background-fill:         #FFFFFF !important;
+  --panel-border-color:            #E7E5E0 !important;
+
+  /* Block labels — the floating "Severidad mínima" / "Modelo LLM" badges */
+  --block-label-background-fill:   transparent !important;
+  --block-label-text-color:        #18181B !important;
+  --block-label-border-color:      transparent !important;
+  --block-label-padding:           0 !important;
+  --block-label-radius:            0 !important;
+  --block-title-background-fill:   transparent !important;
+  --block-title-text-color:        #18181B !important;
+  --block-title-padding:           0 !important;
+  --block-title-radius:            0 !important;
+
+  /* Inputs / dropdowns */
+  --input-background-fill:               #FFFFFF !important;
+  --input-background-fill-hover:         #FFFFFF !important;
+  --input-background-fill-focus:         #FFFFFF !important;
+  --input-border-color:                  #E7E5E0 !important;
+  --input-border-color-hover:            #D6D3CD !important;
+  --input-border-color-focus:            #4F46E5 !important;
+  --input-text-color:                    #18181B !important;
+  --input-placeholder-color:             #71717A !important;
+  --input-radius:                        8px !important;
+
+  /* Checkbox */
+  --checkbox-background-color:           #FFFFFF !important;
+  --checkbox-background-color-selected:  #4F46E5 !important;
+  --checkbox-background-color-hover:     #FFFFFF !important;
+  --checkbox-background-color-focus:     #FFFFFF !important;
+  --checkbox-border-color:               #D6D3CD !important;
+  --checkbox-border-color-selected:      #4F46E5 !important;
+  --checkbox-border-color-focus:         #4F46E5 !important;
+  --checkbox-border-color-hover:         #4F46E5 !important;
+  --checkbox-label-background-fill:      transparent !important;
+  --checkbox-label-text-color:           #18181B !important;
+  --checkbox-label-text-color-selected:  #18181B !important;
+
+  /* Dropdown menu (the open list of choices) */
+  --color-accent:                  #4F46E5 !important;
+  --color-accent-soft:             #EEF2FF !important;
+
+  /* Borders */
+  --border-color-primary:          #E7E5E0 !important;
+  --border-color-accent:           #4F46E5 !important;
+  --border-color-accent-subdued:   rgba(79, 70, 229, 0.18) !important;
+
+  /* Text */
+  --body-text-color:               #18181B !important;
+  --body-text-color-subdued:       #52525B !important;
+  --color-text-primary:            #18181B !important;
+  --color-text-secondary:          #27272A !important;
+  --color-text-tertiary:           #52525B !important;
+  --link-text-color:               #4F46E5 !important;
+  --link-text-color-hover:         #4338CA !important;
+
+  /* Buttons */
+  --button-primary-background-fill:       #4F46E5 !important;
+  --button-primary-background-fill-hover: #4338CA !important;
+  --button-primary-text-color:            #FFFFFF !important;
+  --button-primary-text-color-hover:      #FFFFFF !important;
+  --button-primary-border-color:          #4F46E5 !important;
+  --button-primary-border-color-hover:    #4338CA !important;
+  --button-secondary-background-fill:       #FFFFFF !important;
+  --button-secondary-background-fill-hover: #F4F4F0 !important;
+  --button-secondary-text-color:            #18181B !important;
+  --button-secondary-text-color-hover:      #18181B !important;
+  --button-secondary-border-color:          #E7E5E0 !important;
+  --button-secondary-border-color-hover:    #D6D3CD !important;
+
+  /* Accordion */
+  --accordion-text-color:          #18181B !important;
+
+  /* Tabs */
+  --tab-nav-background-fill:        transparent !important;
+  --tab-nav-background-fill-active: transparent !important;
+  --tab-nav-border-color:           #E7E5E0 !important;
+  --tab-nav-text-color:             #52525B !important;
+  --tab-nav-text-color-active:      #4F46E5 !important;
+
+  /* Neutrals (used by many components) — make them all light */
+  --neutral-50:  #FAFAF7 !important;
+  --neutral-100: #F5F5F1 !important;
+  --neutral-200: #E7E5E0 !important;
+  --neutral-300: #D6D3CD !important;
+  --neutral-400: #A8A29E !important;
+  --neutral-500: #78716C !important;
+  --neutral-600: #57534E !important;
+  --neutral-700: #44403C !important;
+  --neutral-800: #292524 !important;
+  --neutral-900: #1C1917 !important;
+  --neutral-950: #0C0A09 !important;
+
+  /* Primary (indigo) — used by buttons and accent */
+  --primary-50:  #EEF2FF !important;
+  --primary-100: #E0E7FF !important;
+  --primary-200: #C7D2FE !important;
+  --primary-300: #A5B4FC !important;
+  --primary-400: #818CF8 !important;
+  --primary-500: #6366F1 !important;
+  --primary-600: #4F46E5 !important;
+  --primary-700: #4338CA !important;
+  --primary-800: #3730A3 !important;
+  --primary-900: #312E81 !important;
 }
 
 /* ---------- design tokens ---------- */
@@ -541,11 +652,30 @@ label,
 .gr-form label,
 .gr-block-label,
 .gr-form > .label,
-span.svelte-1gfkn6j {
+.block-label,
+[class*="block-label"],
+span.svelte-1gfkn6j,
+.label-wrap,
+.label-wrap span,
+[data-testid="block-label"] {
   color: var(--cs-text) !important;
+  background: transparent !important;
   font-weight: 600 !important;
   font-size: 13px !important;
   letter-spacing: -0.005em !important;
+  border: none !important;
+  padding: 0 0 6px 0 !important;
+  border-radius: 0 !important;
+  text-transform: none !important;
+}
+
+/* Specifically kill the colored badge background on Gradio labels */
+.block-label,
+[class*="block-label"],
+[class*="block_label"] {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
 }
 
 .info,
@@ -556,28 +686,76 @@ span.svelte-1gfkn6j {
   font-weight: 400 !important;
 }
 
-/* Dropdowns */
+/* Dropdowns (Gradio 5 uses lots of selectors) */
 .gr-dropdown,
 select,
-.gr-dropdown input {
+[data-testid="dropdown"],
+.dropdown,
+.svelte-dropdown,
+.wrap.svelte-1aanizp,
+[class*="dropdown"] {
   background: var(--cs-card) !important;
   color: var(--cs-text) !important;
   border: 1px solid var(--cs-border) !important;
   border-radius: var(--cs-radius-sm) !important;
 }
-.gr-dropdown ul {
+.gr-dropdown input,
+.dropdown input,
+[data-testid="dropdown"] input,
+[class*="dropdown"] input {
+  background: transparent !important;
+  color: var(--cs-text) !important;
+  border: none !important;
+  padding: 8px 10px !important;
+  box-shadow: none !important;
+}
+/* Open dropdown — the floating list of options */
+.gr-dropdown ul,
+.dropdown ul,
+[data-testid="dropdown"] ul,
+ul.options,
+[class*="options"] {
   background: var(--cs-card) !important;
   border: 1px solid var(--cs-border) !important;
   border-radius: var(--cs-radius-sm) !important;
   box-shadow: var(--cs-shadow-md) !important;
+  padding: 4px !important;
 }
-.gr-dropdown li {
+.gr-dropdown li,
+.dropdown li,
+[data-testid="dropdown"] li,
+ul.options li,
+[class*="options"] li,
+.gr-dropdown .item,
+[role="option"] {
+  background: var(--cs-card) !important;
   color: var(--cs-text) !important;
   padding: 8px 12px !important;
+  border-radius: 6px !important;
+  font-size: 13.5px !important;
 }
-.gr-dropdown li:hover {
+.gr-dropdown li:hover,
+.dropdown li:hover,
+ul.options li:hover,
+[class*="options"] li:hover,
+[role="option"]:hover,
+[role="option"][data-highlighted="true"] {
   background: var(--cs-accent-soft) !important;
   color: var(--cs-accent) !important;
+}
+[role="option"][aria-selected="true"],
+.gr-dropdown li.selected,
+ul.options li.selected {
+  background: var(--cs-accent-soft) !important;
+  color: var(--cs-accent) !important;
+  font-weight: 500 !important;
+}
+
+/* Dropdown arrow / chevron */
+.dropdown svg,
+[data-testid="dropdown"] svg {
+  stroke: var(--cs-muted) !important;
+  fill: var(--cs-muted) !important;
 }
 
 /* Checkbox */
@@ -590,10 +768,12 @@ input[type="checkbox"] {
   accent-color: var(--cs-accent) !important;
 }
 
-/* File upload */
+/* File upload / file output (download button background) */
 .gr-file,
 .file-preview,
-.file-drop {
+.file-drop,
+[data-testid="file"],
+[class*="file-preview"] {
   border: 2px dashed var(--cs-border) !important;
   border-radius: var(--cs-radius) !important;
   background: var(--cs-card) !important;
@@ -605,6 +785,18 @@ input[type="checkbox"] {
 .file-drop:hover {
   border-color: var(--cs-accent) !important;
   background: var(--cs-accent-soft) !important;
+}
+/* When file is just an output (download button) — not a drop zone */
+.gr-file.empty,
+[data-testid="file"].empty {
+  background: var(--cs-card) !important;
+  border: 1px solid var(--cs-border) !important;
+  border-style: solid !important;
+}
+.gr-file svg,
+[data-testid="file"] svg {
+  stroke: var(--cs-muted) !important;
+  fill: var(--cs-muted) !important;
 }
 
 /* ---------- FINDING CARDS ---------- */
@@ -864,21 +1056,44 @@ input[type="checkbox"] {
 
 /* ---------- ACCORDION ---------- */
 .gr-accordion,
-[data-testid="accordion"] {
+[data-testid="accordion"],
+[class*="accordion"],
+details {
   border: 1px solid var(--cs-border) !important;
   border-radius: var(--cs-radius) !important;
   background: var(--cs-card) !important;
   box-shadow: var(--cs-shadow-sm) !important;
   margin-top: 20px !important;
+  overflow: hidden;
 }
 .gr-accordion > button,
-[data-testid="accordion"] > button {
+.gr-accordion > summary,
+[data-testid="accordion"] > button,
+[data-testid="accordion"] > summary,
+[class*="accordion"] > button,
+[class*="accordion"] > summary,
+details > summary {
   font-weight: 500 !important;
   font-size: 13.5px !important;
   color: var(--cs-text) !important;
   padding: 14px 18px !important;
-  background: transparent !important;
+  background: var(--cs-card) !important;
   border: none !important;
+  cursor: pointer;
+}
+.gr-accordion > button:hover,
+.gr-accordion > summary:hover,
+[data-testid="accordion"] > button:hover {
+  background: var(--cs-bg-2) !important;
+}
+/* Accordion content (where dropdowns live in "Opciones avanzadas") */
+.gr-accordion > div,
+[data-testid="accordion"] > div,
+[class*="accordion"] > div,
+details > div {
+  background: var(--cs-card) !important;
+  padding: 16px 18px !important;
+  border-top: 1px solid var(--cs-border) !important;
 }
 
 /* ---------- STATUS ---------- */

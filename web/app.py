@@ -355,12 +355,16 @@ def build_ui() -> gr.Blocks:
     model_choices = pulled if pulled else [_settings.ollama_model]
     default_model = _settings.ollama_model if _settings.ollama_model in model_choices else model_choices[0]
 
-    theme = gr.themes.Soft(
+    # Use Base theme — it's the lightest preset and lets our CSS take over fully.
+    # Soft / Default both ship dark variants for some components (dropdowns,
+    # accordion) that our `color-scheme: light` can't override cleanly.
+    theme = gr.themes.Base(
         primary_hue="indigo",
-        secondary_hue="slate",
-        neutral_hue="slate",
+        secondary_hue="indigo",
+        neutral_hue="zinc",
         radius_size=gr.themes.sizes.radius_md,
         spacing_size=gr.themes.sizes.spacing_md,
+        font=[gr.themes.GoogleFont("Inter"), "ui-sans-serif", "system-ui", "sans-serif"],
     )
 
     with gr.Blocks(
