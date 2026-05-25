@@ -18,7 +18,6 @@ from codesentinel.review import ReviewEngine
 from codesentinel.schema import ReviewResult, Severity
 from web.components import (
     EMPTY_STATE,
-    SEVERITY_LEGEND_HTML,
     render_findings_html,
     render_stats_html,
 )
@@ -60,19 +59,13 @@ def _read_sample(key: str) -> tuple[str, str]:
 
 HERO_HTML = f"""
 <div class='cs-hero'>
-  <div class='cs-hero-row'>
-    <div class='cs-hero-brand'>
-      <div class='cs-hero-logo'>CS</div>
-      <div>
-        <h1 class='cs-hero-title'>CodeSentinel AI</h1>
-        <p class='cs-hero-subtitle'>Revisor de código con IA · 100% en tu Mac</p>
-      </div>
-    </div>
-    <div class='cs-hero-pills'>
-      <span class='cs-pill'><span class='dot'></span> Local · sin red</span>
-      <span class='cs-pill'>{_settings.ollama_model.split(':')[0]}</span>
-      <span class='cs-pill'>v{__version__}</span>
-    </div>
+  <div>
+    <h1>CodeSentinel AI</h1>
+    <p>Revisor de código con IA, ejecutándose 100% en tu Mac.</p>
+  </div>
+  <div class='cs-hero-meta'>
+    <span class='cs-pill'><span class='dot'></span> Local</span>
+    <span class='cs-pill'><code>{_settings.ollama_model.split(':')[0]}</code></span>
   </div>
 </div>
 """
@@ -111,17 +104,14 @@ hacia el daemon de Ollama, que corre completamente local.
 Proyecto 2 de *Inteligencia Artificial* — Universidad Surcolombiana (USCO).
 """
 
-FOOTER_HTML = """
+FOOTER_HTML = f"""
 <div class='cs-footer'>
-  <b>Linda Valentina Lopez Rubiano</b> · <b>Juan Felipe Andrade</b><br/>
-  Universidad Surcolombiana · Inteligencia Artificial · 2026
+  <b>Linda Valentina Lopez Rubiano</b> &middot; <b>Juan Felipe Andrade</b>
+  &middot; USCO &middot; v{__version__}
 </div>
 """
 
-PASTE_PLACEHOLDER = """# Pega tu código aquí…
-# O haz clic en uno de los ejemplos de arriba para probar.
-
-def get_user(uid):
+PASTE_PLACEHOLDER = """def get_user(uid):
     query = "SELECT * FROM users WHERE id = " + str(uid)
     return db.execute(query)
 """
@@ -156,7 +146,7 @@ def _empty_outputs():
         EMPTY_STATE,
         render_stats_html(ReviewResult(file_path="", language="auto")),
         None,
-        "Listo cuando tú lo estés.",
+        "Listo.",
     )
 
 
@@ -270,98 +260,80 @@ def build_ui() -> gr.Blocks:
         with gr.Tabs(elem_id="cs-tabs"):
 
             # ---------- Tab 1: Paste code ----------
-            with gr.Tab("📝  Pegar código"):
-                gr.Markdown(
-                    "**Prueba con un ejemplo** o pega tu propio código.",
-                    elem_id="cs-paste-intro",
-                )
-
-                with gr.Row(elem_classes="cs-samples-row"):
-                    sample_py = gr.Button("🐍 Bug Python", size="sm", elem_classes="cs-sample-btn")
-                    sample_js = gr.Button("⚡ XSS en JS", size="sm", elem_classes="cs-sample-btn")
-                    sample_ts = gr.Button("📘 TS sucio", size="sm", elem_classes="cs-sample-btn")
-                    sample_java = gr.Button("☕ Java legacy", size="sm", elem_classes="cs-sample-btn")
-
+            with gr.Tab("Pegar código"):
                 code_in = gr.Code(
-                    label="Tu código",
+                    label="Código",
                     language="python",
                     lines=16,
                     value=PASTE_PLACEHOLDER,
                 )
 
-                with gr.Row():
-                    paste_btn = gr.Button("🔍  Revisar código", variant="primary", size="lg", scale=2)
+                with gr.Row(elem_classes="cs-samples-row"):
+                    sample_py = gr.Button("Bug Python", size="sm", elem_classes="cs-sample-btn")
+                    sample_js = gr.Button("XSS JavaScript", size="sm", elem_classes="cs-sample-btn")
+                    sample_ts = gr.Button("Tipos TypeScript", size="sm", elem_classes="cs-sample-btn")
+                    sample_java = gr.Button("Legacy Java", size="sm", elem_classes="cs-sample-btn")
+
+                paste_btn = gr.Button("Revisar código", variant="primary", size="lg")
 
             # ---------- Tab 2: Upload file ----------
-            with gr.Tab("📂  Subir archivo"):
-                gr.Markdown("Sube cualquier archivo de código fuente. Detectamos el lenguaje automáticamente.")
+            with gr.Tab("Subir archivo"):
                 file_in = gr.File(
                     file_types=[".py", ".js", ".jsx", ".ts", ".tsx", ".java", ".go", ".rs", ".rb", ".php", ".kt", ".cpp", ".c"],
-                    label="Archivo de código",
+                    label="Archivo",
                 )
-                file_btn = gr.Button("🔍  Revisar archivo", variant="primary", size="lg")
+                file_btn = gr.Button("Revisar archivo", variant="primary", size="lg")
 
             # ---------- Tab 3: Git diff ----------
-            with gr.Tab("🔀  Git diff"):
-                gr.Markdown("Revisa solo las líneas cambiadas en un repositorio.")
+            with gr.Tab("Git diff"):
                 with gr.Row():
-                    repo_in = gr.Textbox(label="Ruta al repositorio", value=str(Path.cwd()), scale=3)
-                    ref_in = gr.Textbox(label="Comparar contra", value="HEAD", scale=1)
+                    repo_in = gr.Textbox(label="Repositorio", value=str(Path.cwd()), scale=3)
+                    ref_in = gr.Textbox(label="Ref", value="HEAD", scale=1)
                     staged_cb = gr.Checkbox(value=False, label="Solo staged", scale=1)
-                diff_btn = gr.Button("🔍  Revisar diff", variant="primary", size="lg")
+                diff_btn = gr.Button("Revisar diff", variant="primary", size="lg")
 
             # ---------- Tab 4: About ----------
-            with gr.Tab("ℹ️  Acerca de"):
+            with gr.Tab("Acerca"):
                 gr.Markdown(ABOUT_MD)
 
         # ---------- Status bar ----------
         status = gr.Markdown(
-            "Listo cuando tú lo estés.",
+            "Listo.",
             elem_id="cs-status-md",
         )
 
         # ---------- Results section ----------
         with gr.Row(equal_height=False):
             with gr.Column(scale=2):
-                gr.Markdown("### Hallazgos")
-                gr.HTML(SEVERITY_LEGEND_HTML)
                 findings_out = gr.HTML(value=EMPTY_STATE)
 
             with gr.Column(scale=1):
-                gr.Markdown("### Resumen")
                 counts_out = gr.HTML(
                     value=render_stats_html(ReviewResult(file_path="", language="auto"))
                 )
-                gr.Markdown("&nbsp;")
-                report_dl = gr.File(label="📄 Reporte Markdown", interactive=False)
-
-                # Filter (compact)
-                with gr.Group():
-                    min_sev_dd = gr.Dropdown(
-                        choices=SEVERITY_CHOICES,
-                        value="info",
-                        label="Severidad mínima a mostrar",
-                        interactive=True,
-                    )
+                min_sev_dd = gr.Dropdown(
+                    choices=SEVERITY_CHOICES,
+                    value="info",
+                    label="Severidad mínima",
+                    interactive=True,
+                )
+                report_dl = gr.File(label="Reporte Markdown", interactive=False)
 
         # ---------- Advanced settings (collapsed) ----------
-        with gr.Accordion("⚙️  Opciones avanzadas", open=False), gr.Row():
+        with gr.Accordion("Opciones avanzadas", open=False), gr.Row():
             model_dd = gr.Dropdown(
                 choices=model_choices,
                 value=default_model,
                 label="Modelo LLM",
-                info="Modelos que has descargado con `ollama pull`",
             )
             lang_dd = gr.Dropdown(
                 choices=LANGUAGE_CHOICES,
                 value="auto",
                 label="Lenguaje",
-                info="Solo necesario al pegar código",
             )
             static_cb = gr.Checkbox(
                 value=True,
-                label="Aumentar con analizadores estáticos",
-                info="Combina LLM con bandit/ruff/ESLint",
+                label="Analizadores estáticos",
             )
 
         # ---------- Footer ----------

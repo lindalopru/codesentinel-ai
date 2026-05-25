@@ -81,23 +81,17 @@ def _finding_card(f: Finding, language: str) -> str:
 
 EMPTY_STATE = """
 <div class='cs-empty'>
-  <span class='ico'>🔎</span>
-  <h3>Aún no has analizado código</h3>
-  <p>Sube un archivo, pega código o usa un ejemplo para empezar.</p>
-  <div class='steps'>
-    <div class='step'><span class='n'>1</span><span>Elige una pestaña arriba</span></div>
-    <div class='step'><span class='n'>2</span><span>Pega o sube tu código</span></div>
-    <div class='step'><span class='n'>3</span><span>Pulsa <b>Revisar</b></span></div>
-  </div>
+  <h3>Sin análisis aún</h3>
+  <p>Pega código, sube un archivo, o prueba un ejemplo para empezar.</p>
 </div>
 """
 
 NO_FINDINGS = """
 <div class='cs-success'>
-  <span class='ico'>✅</span>
+  <span class='ico'>✓</span>
   <div>
     <h3>Sin hallazgos</h3>
-    <p>El código revisado no presenta problemas detectables por el modelo.</p>
+    <p>El modelo no detectó problemas en el código revisado.</p>
   </div>
 </div>
 """
@@ -140,21 +134,12 @@ def render_stats_html(results: ReviewResult | list[ReviewResult]) -> str:
 
     cards = []
     for sev in ("critical", "high", "medium", "low", "info"):
+        n = totals[sev]
+        zero_class = " zero" if n == 0 else ""
         cards.append(
-            f"<div class='cs-stat-card {sev}'>"
-            f"<div class='v'>{totals[sev]}</div>"
+            f"<div class='cs-stat-card {sev}{zero_class}'>"
+            f"<div class='v'>{n}</div>"
             f"<div class='l'>{sev}</div>"
             f"</div>"
         )
     return "<div class='cs-stats-grid'>" + "".join(cards) + "</div>"
-
-
-SEVERITY_LEGEND_HTML = """
-<div class='cs-legend'>
-  <span class='cs-legend-item'><span class='cs-legend-swatch' style='background:#F96167;'></span>Critical</span>
-  <span class='cs-legend-item'><span class='cs-legend-swatch' style='background:#DC2626;'></span>High</span>
-  <span class='cs-legend-item'><span class='cs-legend-swatch' style='background:#D97706;'></span>Medium</span>
-  <span class='cs-legend-item'><span class='cs-legend-swatch' style='background:#2563EB;'></span>Low</span>
-  <span class='cs-legend-item'><span class='cs-legend-swatch' style='background:#64748B;'></span>Info</span>
-</div>
-"""
