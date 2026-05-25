@@ -83,6 +83,19 @@ HERO_HTML = f"""
       </svg>
       <code>{_settings.ollama_model.split(':')[0]}</code>
     </span>
+    <button id='cs-theme-toggle' class='cs-theme-toggle' type='button'
+            aria-label='Cambiar tema' title='Cambiar tema (claro/oscuro)'>
+      <svg class='icon-moon' viewBox='0 0 24 24'>
+        <path d='M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z'/>
+      </svg>
+      <svg class='icon-sun' viewBox='0 0 24 24'>
+        <circle cx='12' cy='12' r='4'/>
+        <path d='M12 2v2'/><path d='M12 20v2'/>
+        <path d='m4.93 4.93 1.41 1.41'/><path d='m17.66 17.66 1.41 1.41'/>
+        <path d='M2 12h2'/><path d='M20 12h2'/>
+        <path d='m6.34 17.66-1.41 1.41'/><path d='m19.07 4.93-1.41 1.41'/>
+      </svg>
+    </button>
   </div>
 </div>
 """
@@ -367,10 +380,49 @@ def build_ui() -> gr.Blocks:
         font=[gr.themes.GoogleFont("Inter"), "ui-sans-serif", "system-ui", "sans-serif"],
     )
 
+    # JavaScript runs once when the page loads. It:
+    #   1. Reads the user's previous choice from localStorage (or OS preference).
+    #   2. Applies data-theme="dark" or "light" to the root <html>.
+    #   3. Wires up the toggle button (looked up by retry since Gradio renders async).
+    theme_js = """
+() => {
+  const KEY = 'cs-theme';
+  const apply = (t) => {
+    document.documentElement.setAttribute('data-theme', t);
+  };
+  // initial
+  let saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  if (!saved) {
+    saved = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
+      ? 'dark' : 'light';
+  }
+  apply(saved);
+
+  // wire toggle (retry until button exists, since Gradio renders async)
+  const attach = () => {
+    const btn = document.getElementById('cs-theme-toggle');
+    if (!btn || btn.dataset.bound) {
+      if (!btn) setTimeout(attach, 80);
+      return;
+    }
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme') || 'light';
+      const next = current === 'dark' ? 'light' : 'dark';
+      apply(next);
+      try { localStorage.setItem(KEY, next); } catch (e) {}
+    });
+  };
+  attach();
+}
+"""
+
     with gr.Blocks(
         title="CodeSentinel AI",
         theme=theme,
         css=CSS,
+        js=theme_js,
         analytics_enabled=False,
     ) as demo:
 

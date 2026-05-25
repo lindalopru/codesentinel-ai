@@ -1,159 +1,41 @@
-/* CodeSentinel AI — Premium UI v3
+/* CodeSentinel AI — Premium UI v4 with full dark mode
  *
- * Design system:
- *   - Warm off-white background, never pure white
- *   - Subtle dotted-grid pattern on hero (Stripe / Linear inspired)
- *   - Thin gradient accent line at the very top of the page
- *   - One color story: indigo accent, severity colors only on badges
- *   - High-contrast code editor (One Dark Pro inspired tokens)
- *   - Real SVG icons, never emoji
- *   - Subtle hover elevations, no chunky shadows
+ * Two themes share the same component structure. Variables prefixed with
+ * --cs-* are our design tokens. We also override Gradio's own --neutral-*,
+ * --primary-*, and component-specific variables to make sure third-party
+ * components (dropdowns, accordion, file picker) follow the theme.
+ *
+ * Theme is toggled via [data-theme="dark"] on <html>. The toggle JS lives
+ * in web/app.py (injected via gr.Blocks(js=...)).
  */
 
-/* ---------- force light mode + override ALL Gradio CSS variables ---------- */
+/* =========================================================
+ *  LIGHT THEME (default)
+ * ========================================================= */
 :root,
 .gradio-container,
-.gradio-container.dark,
-body.dark,
-body[data-theme="dark"] {
-  color-scheme: light !important;
+.gradio-container.dark {
+  color-scheme: light;
 
-  /* Surfaces / backgrounds */
-  --background-fill-primary:       #FAFAF7 !important;
-  --background-fill-secondary:     #F5F5F1 !important;
-  --body-background-fill:          #FAFAF7 !important;
-  --block-background-fill:         #FFFFFF !important;
-  --block-border-color:            #E7E5E0 !important;
-  --panel-background-fill:         #FFFFFF !important;
-  --panel-border-color:            #E7E5E0 !important;
-
-  /* Block labels — the floating "Severidad mínima" / "Modelo LLM" badges */
-  --block-label-background-fill:   transparent !important;
-  --block-label-text-color:        #18181B !important;
-  --block-label-border-color:      transparent !important;
-  --block-label-padding:           0 !important;
-  --block-label-radius:            0 !important;
-  --block-title-background-fill:   transparent !important;
-  --block-title-text-color:        #18181B !important;
-  --block-title-padding:           0 !important;
-  --block-title-radius:            0 !important;
-
-  /* Inputs / dropdowns */
-  --input-background-fill:               #FFFFFF !important;
-  --input-background-fill-hover:         #FFFFFF !important;
-  --input-background-fill-focus:         #FFFFFF !important;
-  --input-border-color:                  #E7E5E0 !important;
-  --input-border-color-hover:            #D6D3CD !important;
-  --input-border-color-focus:            #4F46E5 !important;
-  --input-text-color:                    #18181B !important;
-  --input-placeholder-color:             #71717A !important;
-  --input-radius:                        8px !important;
-
-  /* Checkbox */
-  --checkbox-background-color:           #FFFFFF !important;
-  --checkbox-background-color-selected:  #4F46E5 !important;
-  --checkbox-background-color-hover:     #FFFFFF !important;
-  --checkbox-background-color-focus:     #FFFFFF !important;
-  --checkbox-border-color:               #D6D3CD !important;
-  --checkbox-border-color-selected:      #4F46E5 !important;
-  --checkbox-border-color-focus:         #4F46E5 !important;
-  --checkbox-border-color-hover:         #4F46E5 !important;
-  --checkbox-label-background-fill:      transparent !important;
-  --checkbox-label-text-color:           #18181B !important;
-  --checkbox-label-text-color-selected:  #18181B !important;
-
-  /* Dropdown menu (the open list of choices) */
-  --color-accent:                  #4F46E5 !important;
-  --color-accent-soft:             #EEF2FF !important;
-
-  /* Borders */
-  --border-color-primary:          #E7E5E0 !important;
-  --border-color-accent:           #4F46E5 !important;
-  --border-color-accent-subdued:   rgba(79, 70, 229, 0.18) !important;
-
-  /* Text */
-  --body-text-color:               #18181B !important;
-  --body-text-color-subdued:       #52525B !important;
-  --color-text-primary:            #18181B !important;
-  --color-text-secondary:          #27272A !important;
-  --color-text-tertiary:           #52525B !important;
-  --link-text-color:               #4F46E5 !important;
-  --link-text-color-hover:         #4338CA !important;
-
-  /* Buttons */
-  --button-primary-background-fill:       #4F46E5 !important;
-  --button-primary-background-fill-hover: #4338CA !important;
-  --button-primary-text-color:            #FFFFFF !important;
-  --button-primary-text-color-hover:      #FFFFFF !important;
-  --button-primary-border-color:          #4F46E5 !important;
-  --button-primary-border-color-hover:    #4338CA !important;
-  --button-secondary-background-fill:       #FFFFFF !important;
-  --button-secondary-background-fill-hover: #F4F4F0 !important;
-  --button-secondary-text-color:            #18181B !important;
-  --button-secondary-text-color-hover:      #18181B !important;
-  --button-secondary-border-color:          #E7E5E0 !important;
-  --button-secondary-border-color-hover:    #D6D3CD !important;
-
-  /* Accordion */
-  --accordion-text-color:          #18181B !important;
-
-  /* Tabs */
-  --tab-nav-background-fill:        transparent !important;
-  --tab-nav-background-fill-active: transparent !important;
-  --tab-nav-border-color:           #E7E5E0 !important;
-  --tab-nav-text-color:             #52525B !important;
-  --tab-nav-text-color-active:      #4F46E5 !important;
-
-  /* Neutrals (used by many components) — make them all light */
-  --neutral-50:  #FAFAF7 !important;
-  --neutral-100: #F5F5F1 !important;
-  --neutral-200: #E7E5E0 !important;
-  --neutral-300: #D6D3CD !important;
-  --neutral-400: #A8A29E !important;
-  --neutral-500: #78716C !important;
-  --neutral-600: #57534E !important;
-  --neutral-700: #44403C !important;
-  --neutral-800: #292524 !important;
-  --neutral-900: #1C1917 !important;
-  --neutral-950: #0C0A09 !important;
-
-  /* Primary (indigo) — used by buttons and accent */
-  --primary-50:  #EEF2FF !important;
-  --primary-100: #E0E7FF !important;
-  --primary-200: #C7D2FE !important;
-  --primary-300: #A5B4FC !important;
-  --primary-400: #818CF8 !important;
-  --primary-500: #6366F1 !important;
-  --primary-600: #4F46E5 !important;
-  --primary-700: #4338CA !important;
-  --primary-800: #3730A3 !important;
-  --primary-900: #312E81 !important;
-}
-
-/* ---------- design tokens ---------- */
-:root {
-  /* Surfaces */
-  --cs-bg:        #FAFAF7;   /* warm off-white */
-  --cs-bg-2:      #F5F5F1;   /* slightly deeper */
-  --cs-card:      #FFFFFF;
-  --cs-subtle:    #F4F4F0;
-  --cs-border:    #E7E5E0;
+  /* Design tokens */
+  --cs-bg:       #FAFAF7;
+  --cs-bg-2:     #F5F5F1;
+  --cs-card:     #FFFFFF;
+  --cs-card-2:   #FAFAF7;
+  --cs-subtle:   #F4F4F0;
+  --cs-border:   #E7E5E0;
   --cs-border-2: #D6D3CD;
 
-  /* Text — high contrast first */
-  --cs-text:      #18181B;   /* near-black */
-  --cs-text-2:    #27272A;
-  --cs-muted:     #52525B;   /* AAA on cream */
-  --cs-faint:     #71717A;
+  --cs-text:    #18181B;
+  --cs-text-2:  #27272A;
+  --cs-muted:   #52525B;
+  --cs-faint:   #71717A;
 
-  /* Accent — indigo */
   --cs-accent:       #4F46E5;
   --cs-accent-2:     #4338CA;
   --cs-accent-light: #6366F1;
   --cs-accent-soft:  #EEF2FF;
-  --cs-accent-line:  rgba(79, 70, 229, 0.12);
 
-  /* Severity (badges + card borders only) */
   --cs-critical: #DC2626;
   --cs-high:     #EA580C;
   --cs-medium:   #CA8A04;
@@ -161,34 +43,266 @@ body[data-theme="dark"] {
   --cs-info:     #71717A;
   --cs-success:  #059669;
 
-  /* Code editor (GitHub light — calibrated for AAA contrast) */
   --cs-code-bg:        #FFFFFF;
-  --cs-code-bg-2:      #F6F8FA;   /* gutter */
+  --cs-code-bg-2:      #F6F8FA;
   --cs-code-text:      #1F2328;
   --cs-code-text-bold: #0B1019;
-  --cs-code-keyword:   #CF222E;   /* def, class, return */
-  --cs-code-string:    #0A3069;   /* "..." */
+  --cs-code-keyword:   #CF222E;
+  --cs-code-string:    #0A3069;
   --cs-code-number:    #0550AE;
-  --cs-code-fn:        #8250DF;   /* function names */
+  --cs-code-fn:        #8250DF;
   --cs-code-builtin:   #953800;
   --cs-code-comment:   #6E7781;
   --cs-code-op:        #1F2328;
   --cs-code-cursor:    #4F46E5;
   --cs-code-selection: #DDEBFF;
-  --cs-code-line:      #8C959F;   /* gutter line numbers */
+  --cs-code-line:      #8C959F;
 
-  /* Spacing */
+  --cs-snippet-bg:   #0F172A;
+  --cs-snippet-fg:   #E2E8F0;
+
+  --cs-shadow-sm: 0 1px 2px rgba(24, 24, 27, 0.04);
+  --cs-shadow:    0 4px 12px -2px rgba(24, 24, 27, 0.06), 0 2px 4px -2px rgba(24, 24, 27, 0.04);
+  --cs-shadow-md: 0 8px 24px -4px rgba(24, 24, 27, 0.08), 0 4px 8px -4px rgba(24, 24, 27, 0.04);
+
   --cs-radius-sm: 8px;
   --cs-radius:    12px;
   --cs-radius-lg: 16px;
 
-  /* Shadows (used sparingly) */
-  --cs-shadow-sm: 0 1px 2px rgba(24, 24, 27, 0.04);
-  --cs-shadow:    0 4px 12px -2px rgba(24, 24, 27, 0.06), 0 2px 4px -2px rgba(24, 24, 27, 0.04);
-  --cs-shadow-md: 0 8px 24px -4px rgba(24, 24, 27, 0.08), 0 4px 8px -4px rgba(24, 24, 27, 0.04);
+  /* ---------- Gradio variable overrides (LIGHT) ---------- */
+  --background-fill-primary:       var(--cs-bg);
+  --background-fill-secondary:     var(--cs-bg-2);
+  --body-background-fill:          var(--cs-bg);
+  --block-background-fill:         var(--cs-card);
+  --block-border-color:            var(--cs-border);
+  --panel-background-fill:         var(--cs-card);
+  --panel-border-color:            var(--cs-border);
+
+  --block-label-background-fill:   transparent;
+  --block-label-text-color:        var(--cs-text);
+  --block-label-border-color:      transparent;
+  --block-label-padding:           0;
+  --block-label-radius:            0;
+  --block-title-background-fill:   transparent;
+  --block-title-text-color:        var(--cs-text);
+  --block-title-padding:           0;
+  --block-title-radius:            0;
+
+  --input-background-fill:               var(--cs-card);
+  --input-background-fill-hover:         var(--cs-card);
+  --input-background-fill-focus:         var(--cs-card);
+  --input-border-color:                  var(--cs-border);
+  --input-border-color-hover:            var(--cs-border-2);
+  --input-border-color-focus:            var(--cs-accent);
+  --input-text-color:                    var(--cs-text);
+  --input-placeholder-color:             var(--cs-faint);
+  --input-radius:                        var(--cs-radius-sm);
+
+  --checkbox-background-color:           var(--cs-card);
+  --checkbox-background-color-selected:  var(--cs-accent);
+  --checkbox-background-color-hover:     var(--cs-card);
+  --checkbox-background-color-focus:     var(--cs-card);
+  --checkbox-border-color:               var(--cs-border-2);
+  --checkbox-border-color-selected:      var(--cs-accent);
+  --checkbox-border-color-focus:         var(--cs-accent);
+  --checkbox-border-color-hover:         var(--cs-accent);
+  --checkbox-label-background-fill:      transparent;
+  --checkbox-label-text-color:           var(--cs-text);
+  --checkbox-label-text-color-selected:  var(--cs-text);
+
+  --color-accent:                  var(--cs-accent);
+  --color-accent-soft:             var(--cs-accent-soft);
+
+  --border-color-primary:          var(--cs-border);
+  --border-color-accent:           var(--cs-accent);
+  --border-color-accent-subdued:   rgba(79, 70, 229, 0.18);
+
+  --body-text-color:               var(--cs-text);
+  --body-text-color-subdued:       var(--cs-muted);
+  --color-text-primary:            var(--cs-text);
+  --color-text-secondary:          var(--cs-text-2);
+  --color-text-tertiary:           var(--cs-muted);
+  --link-text-color:               var(--cs-accent);
+  --link-text-color-hover:         var(--cs-accent-2);
+
+  --button-primary-background-fill:       var(--cs-accent);
+  --button-primary-background-fill-hover: var(--cs-accent-2);
+  --button-primary-text-color:            #FFFFFF;
+  --button-primary-text-color-hover:      #FFFFFF;
+  --button-primary-border-color:          var(--cs-accent);
+  --button-primary-border-color-hover:    var(--cs-accent-2);
+  --button-secondary-background-fill:       var(--cs-card);
+  --button-secondary-background-fill-hover: var(--cs-subtle);
+  --button-secondary-text-color:            var(--cs-text);
+  --button-secondary-text-color-hover:      var(--cs-text);
+  --button-secondary-border-color:          var(--cs-border);
+  --button-secondary-border-color-hover:    var(--cs-border-2);
+
+  --accordion-text-color:          var(--cs-text);
+
+  --tab-nav-background-fill:        transparent;
+  --tab-nav-background-fill-active: transparent;
+  --tab-nav-border-color:           var(--cs-border);
+  --tab-nav-text-color:             var(--cs-muted);
+  --tab-nav-text-color-active:      var(--cs-accent);
+
+  --neutral-50:  #FAFAF7;
+  --neutral-100: #F5F5F1;
+  --neutral-200: #E7E5E0;
+  --neutral-300: #D6D3CD;
+  --neutral-400: #A8A29E;
+  --neutral-500: #78716C;
+  --neutral-600: #57534E;
+  --neutral-700: #44403C;
+  --neutral-800: #292524;
+  --neutral-900: #1C1917;
+  --neutral-950: #0C0A09;
+
+  --primary-50:  #EEF2FF;
+  --primary-100: #E0E7FF;
+  --primary-200: #C7D2FE;
+  --primary-300: #A5B4FC;
+  --primary-400: #818CF8;
+  --primary-500: #6366F1;
+  --primary-600: #4F46E5;
+  --primary-700: #4338CA;
+  --primary-800: #3730A3;
+  --primary-900: #312E81;
 }
 
-/* ---------- top accent line (premium signature) ---------- */
+/* =========================================================
+ *  DARK THEME — applied when <html data-theme="dark">
+ * ========================================================= */
+html[data-theme="dark"],
+html[data-theme="dark"] .gradio-container,
+html[data-theme="dark"] body {
+  color-scheme: dark;
+
+  /* Design tokens — GitHub Dark / Linear inspired */
+  --cs-bg:       #0D1117;
+  --cs-bg-2:     #010409;
+  --cs-card:     #161B22;
+  --cs-card-2:   #1C2128;
+  --cs-subtle:   #21262D;
+  --cs-border:   #30363D;
+  --cs-border-2: #424A53;
+
+  --cs-text:    #E6EDF3;
+  --cs-text-2:  #C9D1D9;
+  --cs-muted:   #8B949E;
+  --cs-faint:   #6E7681;
+
+  --cs-accent:       #818CF8;
+  --cs-accent-2:     #A5B4FC;
+  --cs-accent-light: #A5B4FC;
+  --cs-accent-soft:  rgba(129, 140, 248, 0.12);
+
+  --cs-critical: #F85149;
+  --cs-high:     #F0883E;
+  --cs-medium:   #D29922;
+  --cs-low:      #58A6FF;
+  --cs-info:     #8B949E;
+  --cs-success:  #3FB950;
+
+  --cs-code-bg:        #0D1117;
+  --cs-code-bg-2:      #161B22;
+  --cs-code-text:      #C9D1D9;
+  --cs-code-text-bold: #E6EDF3;
+  --cs-code-keyword:   #FF7B72;
+  --cs-code-string:    #A5D6FF;
+  --cs-code-number:    #79C0FF;
+  --cs-code-fn:        #D2A8FF;
+  --cs-code-builtin:   #FFA657;
+  --cs-code-comment:   #8B949E;
+  --cs-code-op:        #FF7B72;
+  --cs-code-cursor:    #A5B4FC;
+  --cs-code-selection: rgba(129, 140, 248, 0.25);
+  --cs-code-line:      #484F58;
+
+  --cs-snippet-bg:   #010409;
+  --cs-snippet-fg:   #E6EDF3;
+
+  --cs-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --cs-shadow:    0 4px 12px -2px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+  --cs-shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.5), 0 4px 8px -4px rgba(0, 0, 0, 0.4);
+
+  /* Gradio variable overrides (DARK) */
+  --background-fill-primary:       var(--cs-bg);
+  --background-fill-secondary:     var(--cs-bg-2);
+  --body-background-fill:          var(--cs-bg);
+  --block-background-fill:         var(--cs-card);
+  --block-border-color:            var(--cs-border);
+  --panel-background-fill:         var(--cs-card);
+  --panel-border-color:            var(--cs-border);
+
+  --block-label-background-fill:   transparent;
+  --block-label-text-color:        var(--cs-text);
+  --block-title-background-fill:   transparent;
+  --block-title-text-color:        var(--cs-text);
+
+  --input-background-fill:               var(--cs-card);
+  --input-background-fill-hover:         var(--cs-card-2);
+  --input-background-fill-focus:         var(--cs-card-2);
+  --input-border-color:                  var(--cs-border);
+  --input-border-color-hover:            var(--cs-border-2);
+  --input-border-color-focus:            var(--cs-accent);
+  --input-text-color:                    var(--cs-text);
+  --input-placeholder-color:             var(--cs-faint);
+
+  --checkbox-background-color:           var(--cs-card);
+  --checkbox-background-color-selected:  var(--cs-accent);
+  --checkbox-background-color-hover:     var(--cs-card-2);
+  --checkbox-border-color:               var(--cs-border-2);
+  --checkbox-border-color-selected:      var(--cs-accent);
+  --checkbox-border-color-focus:         var(--cs-accent);
+  --checkbox-label-text-color:           var(--cs-text);
+  --checkbox-label-text-color-selected:  var(--cs-text);
+
+  --body-text-color:               var(--cs-text);
+  --body-text-color-subdued:       var(--cs-muted);
+  --color-text-primary:            var(--cs-text);
+  --color-text-secondary:          var(--cs-text-2);
+  --color-text-tertiary:           var(--cs-muted);
+
+  --button-primary-background-fill:       var(--cs-accent);
+  --button-primary-background-fill-hover: var(--cs-accent-2);
+  --button-secondary-background-fill:       var(--cs-card);
+  --button-secondary-background-fill-hover: var(--cs-card-2);
+  --button-secondary-text-color:            var(--cs-text);
+  --button-secondary-border-color:          var(--cs-border);
+  --button-secondary-border-color-hover:    var(--cs-border-2);
+
+  --accordion-text-color:          var(--cs-text);
+
+  --tab-nav-text-color:             var(--cs-muted);
+  --tab-nav-text-color-active:      var(--cs-accent);
+  --tab-nav-border-color:           var(--cs-border);
+
+  --neutral-50:  #1C2128;
+  --neutral-100: #21262D;
+  --neutral-200: #30363D;
+  --neutral-300: #424A53;
+  --neutral-400: #6E7681;
+  --neutral-500: #8B949E;
+  --neutral-600: #B1BAC4;
+  --neutral-700: #C9D1D9;
+  --neutral-800: #E6EDF3;
+  --neutral-900: #F0F6FC;
+  --neutral-950: #FFFFFF;
+
+  --primary-50:  rgba(129, 140, 248, 0.10);
+  --primary-100: rgba(129, 140, 248, 0.18);
+  --primary-200: rgba(129, 140, 248, 0.30);
+  --primary-300: #A5B4FC;
+  --primary-400: #818CF8;
+  --primary-500: #6366F1;
+  --primary-600: #4F46E5;
+  --primary-700: #4338CA;
+}
+
+/* =========================================================
+ *  TOP ACCENT LINE (premium signature, same in both themes)
+ * ========================================================= */
 body::before {
   content: "";
   position: fixed;
@@ -205,10 +319,13 @@ body::before {
   opacity: 0.85;
 }
 
-/* ---------- base ---------- */
+/* =========================================================
+ *  BASE
+ * ========================================================= */
 html, body, .gradio-container {
   background: var(--cs-bg) !important;
   color: var(--cs-text) !important;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .gradio-container,
@@ -219,7 +336,6 @@ html, body, .gradio-container {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Constrain width — wide apps feel cheap */
 .gradio-container > div.main,
 .gradio-container > main {
   max-width: 1180px !important;
@@ -227,7 +343,6 @@ html, body, .gradio-container {
   padding: 36px 32px 64px !important;
 }
 
-/* Text-color enforcement so Gradio dark vars don't override */
 .gradio-container p,
 .gradio-container span,
 .gradio-container li,
@@ -238,7 +353,9 @@ html, body, .gradio-container {
   color: var(--cs-text) !important;
 }
 
-/* ---------- HERO (with dotted pattern + accent gradient) ---------- */
+/* =========================================================
+ *  HERO
+ * ========================================================= */
 .cs-hero {
   padding: 40px 36px;
   background-color: var(--cs-card);
@@ -255,6 +372,11 @@ html, body, .gradio-container {
   flex-wrap: wrap;
   position: relative;
   overflow: hidden;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+html[data-theme="dark"] .cs-hero {
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(129, 140, 248, 0.15) 1px, transparent 0);
 }
 .cs-hero::before {
   content: "";
@@ -270,6 +392,14 @@ html, body, .gradio-container {
     transparent 70%
   );
   pointer-events: none;
+}
+html[data-theme="dark"] .cs-hero::before {
+  background: radial-gradient(
+    circle at center,
+    rgba(129, 140, 248, 0.18),
+    rgba(236, 72, 153, 0.06),
+    transparent 70%
+  );
 }
 
 .cs-hero-content {
@@ -339,6 +469,7 @@ html, body, .gradio-container {
   font-weight: 500;
   white-space: nowrap;
   box-shadow: var(--cs-shadow-sm);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 .cs-pill svg {
   width: 12px;
@@ -363,9 +494,48 @@ html, body, .gradio-container {
   background: transparent !important;
   padding: 0 !important;
   font-weight: 500;
+  border: none !important;
 }
 
-/* ---------- TABS ---------- */
+/* THEME TOGGLE BUTTON */
+.cs-theme-toggle {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: var(--cs-card);
+  border: 1px solid var(--cs-border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--cs-shadow-sm);
+  transition: all 0.2s ease;
+  color: var(--cs-muted) !important;
+  padding: 0;
+}
+.cs-theme-toggle:hover {
+  border-color: var(--cs-accent);
+  color: var(--cs-accent) !important;
+  transform: translateY(-1px);
+  box-shadow: var(--cs-shadow);
+}
+.cs-theme-toggle svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.cs-theme-toggle .icon-sun { display: none; }
+.cs-theme-toggle .icon-moon { display: block; }
+html[data-theme="dark"] .cs-theme-toggle .icon-sun { display: block; }
+html[data-theme="dark"] .cs-theme-toggle .icon-moon { display: none; }
+
+/* =========================================================
+ *  TABS
+ * ========================================================= */
 .tab-nav,
 [role="tablist"] {
   border: none !important;
@@ -416,7 +586,9 @@ html, body, .gradio-container {
   border-radius: 2px 2px 0 0;
 }
 
-/* ---------- BUTTONS ---------- */
+/* =========================================================
+ *  BUTTONS
+ * ========================================================= */
 button.primary,
 .gr-button-primary {
   background: var(--cs-accent) !important;
@@ -437,14 +609,6 @@ button.primary:hover,
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(79, 70, 229, 0.3), 0 8px 20px -4px rgba(79, 70, 229, 0.35) !important;
 }
-button.primary:active {
-  transform: translateY(0);
-}
-button.primary:focus-visible {
-  outline: none !important;
-  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.25) !important;
-}
-
 button.lg.primary {
   padding: 12px 24px !important;
   font-size: 15px !important;
@@ -463,11 +627,13 @@ button.secondary,
 }
 button.secondary:hover {
   border-color: var(--cs-border-2) !important;
-  background: var(--cs-subtle) !important;
+  background: var(--cs-card-2) !important;
   transform: translateY(-1px);
 }
 
-/* ---------- SAMPLE CHIPS ---------- */
+/* =========================================================
+ *  SAMPLE CHIPS
+ * ========================================================= */
 .cs-samples-row {
   display: flex;
   flex-wrap: wrap;
@@ -502,7 +668,9 @@ button.cs-sample-btn {
   transform: translateY(-1px);
 }
 
-/* ---------- CODE EDITOR — GitHub light, calibrated for contrast ---------- */
+/* =========================================================
+ *  CODE EDITOR — light + dark variants
+ * ========================================================= */
 .cm-editor {
   border-radius: var(--cs-radius) !important;
   border: 1px solid var(--cs-border) !important;
@@ -512,9 +680,7 @@ button.cs-sample-btn {
 }
 .cm-editor.cm-focused {
   border-color: var(--cs-accent) !important;
-  box-shadow:
-    0 0 0 3px rgba(79, 70, 229, 0.15),
-    var(--cs-shadow) !important;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15), var(--cs-shadow) !important;
   outline: none !important;
 }
 .cm-editor .cm-scroller {
@@ -537,9 +703,15 @@ button.cs-sample-btn {
 .cm-editor .cm-activeLine {
   background: rgba(79, 70, 229, 0.04) !important;
 }
+html[data-theme="dark"] .cm-editor .cm-activeLine {
+  background: rgba(129, 140, 248, 0.06) !important;
+}
 .cm-editor .cm-activeLineGutter {
   background: rgba(79, 70, 229, 0.06) !important;
   color: var(--cs-code-text-bold) !important;
+}
+html[data-theme="dark"] .cm-editor .cm-activeLineGutter {
+  background: rgba(129, 140, 248, 0.10) !important;
 }
 .cm-editor .cm-cursor {
   border-left-color: var(--cs-code-cursor) !important;
@@ -555,12 +727,10 @@ button.cs-sample-btn {
   color: var(--cs-code-text) !important;
 }
 .cm-editor .cm-content * {
-  color: var(--cs-code-text);   /* sane base — tokens below override */
+  color: var(--cs-code-text);
 }
 
-/* CodeMirror 6 obfuscated highlight classes (ͼ = U+037F).
- * The exact mapping depends on the order tokens are registered, so we cover
- * the common ones AND fall back to attribute-based selectors below. */
+/* CodeMirror 6 obfuscated highlight classes */
 .cm-editor .ͼ1, .cm-editor .ͼ2, .cm-editor .ͼ3,
 .cm-editor .ͼ4, .cm-editor .ͼ5, .cm-editor .ͼ6,
 .cm-editor .ͼ7, .cm-editor .ͼ8, .cm-editor .ͼ9,
@@ -573,11 +743,8 @@ button.cs-sample-btn {
 .cm-editor .ͼs, .cm-editor .ͼt, .cm-editor .ͼu,
 .cm-editor .ͼv, .cm-editor .ͼw, .cm-editor .ͼx,
 .cm-editor .ͼy, .cm-editor .ͼz {
-  /* Default to readable text color; specific token classes override */
   color: var(--cs-code-text);
 }
-
-/* Token mapping — Gradio's lezer order */
 .cm-editor .ͼi { color: var(--cs-code-keyword) !important; font-weight: 500; }
 .cm-editor .ͼd { color: var(--cs-code-string) !important; }
 .cm-editor .ͼe { color: var(--cs-code-number) !important; }
@@ -586,22 +753,18 @@ button.cs-sample-btn {
 .cm-editor .ͼm { color: var(--cs-code-comment) !important; font-style: italic; }
 .cm-editor .ͼp { color: var(--cs-code-op) !important; }
 
-/* Attribute-based fallback */
 .cm-editor [class*="keyword"] { color: var(--cs-code-keyword) !important; font-weight: 500; }
 .cm-editor [class*="string"]  { color: var(--cs-code-string) !important; }
 .cm-editor [class*="number"]  { color: var(--cs-code-number) !important; }
 .cm-editor [class*="function"] { color: var(--cs-code-fn) !important; }
 .cm-editor [class*="comment"] { color: var(--cs-code-comment) !important; font-style: italic; }
 .cm-editor [class*="builtin"] { color: var(--cs-code-builtin) !important; }
-
-/* Punctuation must stay readable */
 .cm-editor [class*="punctuation"],
 .cm-editor [class*="bracket"],
 .cm-editor [class*="paren"] {
   color: var(--cs-code-text) !important;
 }
 
-/* gr.Code's label badge */
 .gr-block.code label,
 .gr-block.code .label {
   background: transparent !important;
@@ -611,7 +774,9 @@ button.cs-sample-btn {
   padding: 0 !important;
 }
 
-/* ---------- FORM CONTROLS ---------- */
+/* =========================================================
+ *  FORM CONTROLS
+ * ========================================================= */
 .gr-block,
 .gr-form {
   background: transparent !important;
@@ -669,7 +834,6 @@ span.svelte-1gfkn6j,
   text-transform: none !important;
 }
 
-/* Specifically kill the colored badge background on Gradio labels */
 .block-label,
 [class*="block-label"],
 [class*="block_label"] {
@@ -686,13 +850,12 @@ span.svelte-1gfkn6j,
   font-weight: 400 !important;
 }
 
-/* Dropdowns (Gradio 5 uses lots of selectors) */
+/* Dropdowns */
 .gr-dropdown,
 select,
 [data-testid="dropdown"],
 .dropdown,
 .svelte-dropdown,
-.wrap.svelte-1aanizp,
 [class*="dropdown"] {
   background: var(--cs-card) !important;
   color: var(--cs-text) !important;
@@ -709,7 +872,6 @@ select,
   padding: 8px 10px !important;
   box-shadow: none !important;
 }
-/* Open dropdown — the floating list of options */
 .gr-dropdown ul,
 .dropdown ul,
 [data-testid="dropdown"] ul,
@@ -744,14 +906,11 @@ ul.options li:hover,
   color: var(--cs-accent) !important;
 }
 [role="option"][aria-selected="true"],
-.gr-dropdown li.selected,
-ul.options li.selected {
+.gr-dropdown li.selected {
   background: var(--cs-accent-soft) !important;
   color: var(--cs-accent) !important;
   font-weight: 500 !important;
 }
-
-/* Dropdown arrow / chevron */
 .dropdown svg,
 [data-testid="dropdown"] svg {
   stroke: var(--cs-muted) !important;
@@ -768,7 +927,7 @@ input[type="checkbox"] {
   accent-color: var(--cs-accent) !important;
 }
 
-/* File upload / file output (download button background) */
+/* File upload / output */
 .gr-file,
 .file-preview,
 .file-drop,
@@ -786,20 +945,15 @@ input[type="checkbox"] {
   border-color: var(--cs-accent) !important;
   background: var(--cs-accent-soft) !important;
 }
-/* When file is just an output (download button) — not a drop zone */
-.gr-file.empty,
-[data-testid="file"].empty {
-  background: var(--cs-card) !important;
-  border: 1px solid var(--cs-border) !important;
-  border-style: solid !important;
-}
 .gr-file svg,
 [data-testid="file"] svg {
   stroke: var(--cs-muted) !important;
   fill: var(--cs-muted) !important;
 }
 
-/* ---------- FINDING CARDS ---------- */
+/* =========================================================
+ *  FINDING CARDS
+ * ========================================================= */
 .finding-card {
   background: var(--cs-card);
   border: 1px solid var(--cs-border);
@@ -899,6 +1053,9 @@ input[type="checkbox"] {
   color: var(--cs-text-2) !important;
   line-height: 1.55;
 }
+html[data-theme="dark"] .finding-suggestion {
+  background: linear-gradient(180deg, rgba(63, 185, 80, 0.10), rgba(63, 185, 80, 0.04));
+}
 .finding-suggestion b {
   color: var(--cs-success) !important;
   font-weight: 700;
@@ -912,8 +1069,8 @@ input[type="checkbox"] {
   border: 1px solid #2A2F3A;
 }
 .finding-snippet pre {
-  background: #0F172A !important;
-  color: #E2E8F0 !important;
+  background: var(--cs-snippet-bg) !important;
+  color: var(--cs-snippet-fg) !important;
   padding: 14px 16px !important;
   margin: 0 !important;
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace !important;
@@ -922,7 +1079,9 @@ input[type="checkbox"] {
   overflow-x: auto;
 }
 
-/* ---------- SUMMARY / STATS ---------- */
+/* =========================================================
+ *  STATS GRID
+ * ========================================================= */
 .cs-stats-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -963,12 +1122,13 @@ input[type="checkbox"] {
 .cs-stat-card.high     .v { color: var(--cs-high) !important; }
 .cs-stat-card.medium   .v { color: var(--cs-medium) !important; }
 .cs-stat-card.low      .v { color: var(--cs-low) !important; }
-
-.cs-stat-card.zero .v { color: #D4D4D8 !important; }
+.cs-stat-card.zero .v { color: var(--cs-border-2) !important; }
 .cs-stat-card.zero .l { color: var(--cs-faint) !important; }
 .cs-stat-card.zero:hover { transform: none; box-shadow: var(--cs-shadow-sm); }
 
-/* ---------- EMPTY STATE ---------- */
+/* =========================================================
+ *  EMPTY STATE
+ * ========================================================= */
 .cs-empty {
   background: var(--cs-card);
   background-image:
@@ -979,6 +1139,10 @@ input[type="checkbox"] {
   padding: 64px 28px;
   text-align: center;
   color: var(--cs-muted);
+}
+html[data-theme="dark"] .cs-empty {
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.04) 1px, transparent 0);
 }
 .cs-empty .ico {
   width: 48px;
@@ -1015,7 +1179,7 @@ input[type="checkbox"] {
 }
 
 .cs-success {
-  background: linear-gradient(180deg, rgba(5, 150, 105, 0.04), rgba(5, 150, 105, 0.01));
+  background: linear-gradient(180deg, rgba(5, 150, 105, 0.06), rgba(5, 150, 105, 0.02));
   border: 1px solid rgba(5, 150, 105, 0.25);
   border-left: 3px solid var(--cs-success);
   border-radius: var(--cs-radius);
@@ -1023,6 +1187,11 @@ input[type="checkbox"] {
   display: flex;
   align-items: center;
   gap: 16px;
+}
+html[data-theme="dark"] .cs-success {
+  background: linear-gradient(180deg, rgba(63, 185, 80, 0.08), rgba(63, 185, 80, 0.02));
+  border: 1px solid rgba(63, 185, 80, 0.25);
+  border-left: 3px solid var(--cs-success);
 }
 .cs-success .ico {
   width: 36px;
@@ -1045,16 +1214,18 @@ input[type="checkbox"] {
 .cs-success h3 {
   margin: 0;
   font-weight: 600;
-  color: #064E3B !important;
+  color: var(--cs-text) !important;
   font-size: 15px;
 }
 .cs-success p {
   margin: 2px 0 0;
   font-size: 13px;
-  color: #047857 !important;
+  color: var(--cs-text-2) !important;
 }
 
-/* ---------- ACCORDION ---------- */
+/* =========================================================
+ *  ACCORDION
+ * ========================================================= */
 .gr-accordion,
 [data-testid="accordion"],
 [class*="accordion"],
@@ -1084,9 +1255,8 @@ details > summary {
 .gr-accordion > button:hover,
 .gr-accordion > summary:hover,
 [data-testid="accordion"] > button:hover {
-  background: var(--cs-bg-2) !important;
+  background: var(--cs-card-2) !important;
 }
-/* Accordion content (where dropdowns live in "Opciones avanzadas") */
 .gr-accordion > div,
 [data-testid="accordion"] > div,
 [class*="accordion"] > div,
@@ -1096,7 +1266,9 @@ details > div {
   border-top: 1px solid var(--cs-border) !important;
 }
 
-/* ---------- STATUS ---------- */
+/* =========================================================
+ *  STATUS / FOOTER
+ * ========================================================= */
 .cs-status {
   background: var(--cs-card);
   border: 1px solid var(--cs-border);
@@ -1112,7 +1284,6 @@ details > div {
   font-weight: 600;
 }
 
-/* Status markdown — `gr.Markdown("Listo …")` */
 #cs-status-md,
 #cs-status-md p {
   color: var(--cs-muted) !important;
@@ -1122,7 +1293,6 @@ details > div {
   font-weight: 500;
 }
 
-/* ---------- FOOTER ---------- */
 .cs-footer {
   text-align: center;
   color: var(--cs-faint) !important;
@@ -1133,15 +1303,14 @@ details > div {
 }
 .cs-footer b { color: var(--cs-muted) !important; font-weight: 500; }
 
-/* ---------- ABOUT TAB (redesigned with cards) ---------- */
+/* =========================================================
+ *  ABOUT TAB
+ * ========================================================= */
 .cs-about {
   display: flex;
   flex-direction: column;
   gap: 28px;
   padding: 4px 0;
-}
-.cs-about-section {
-  display: block;
 }
 .cs-about-title {
   font-size: 11px !important;
@@ -1159,16 +1328,15 @@ details > div {
 }
 .cs-about-lead code {
   background: var(--cs-accent-soft) !important;
-  color: var(--cs-accent-2) !important;
+  color: var(--cs-accent) !important;
   padding: 1px 7px;
   border-radius: 5px;
   font-family: ui-monospace, "SF Mono", Menlo, monospace;
   font-size: 12.5px;
   font-weight: 500;
-  border: 1px solid rgba(79, 70, 229, 0.12);
+  border: 1px solid var(--cs-border);
 }
 
-/* Feature cards (Seguridad / Bugs / Performance / Estilo / Documentación) */
 .cs-feature-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -1209,13 +1377,11 @@ details > div {
 .cs-feature-icon.sev-medium   { background: var(--cs-medium); }
 .cs-feature-icon.sev-low      { background: var(--cs-low); }
 .cs-feature-icon.sev-info     { background: var(--cs-info); }
-
 .cs-feature-title {
   font-size: 14px;
   font-weight: 600;
   color: var(--cs-text);
   margin-bottom: 2px;
-  letter-spacing: -0.005em;
 }
 .cs-feature-body {
   font-size: 13px;
@@ -1223,7 +1389,6 @@ details > div {
   line-height: 1.5;
 }
 
-/* Usage steps (1/2/3) */
 .cs-usage-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -1258,7 +1423,6 @@ details > div {
   font-weight: 600;
   color: var(--cs-text);
   margin-bottom: 4px;
-  letter-spacing: -0.005em;
 }
 .cs-usage-body {
   font-size: 13px;
@@ -1276,7 +1440,6 @@ details > div {
   border: 1px solid var(--cs-border);
 }
 
-/* Privacy banner */
 .cs-privacy {
   background: linear-gradient(135deg, var(--cs-accent-soft), rgba(79, 70, 229, 0.04));
   border: 1px solid rgba(79, 70, 229, 0.18);
@@ -1285,6 +1448,10 @@ details > div {
   display: flex;
   gap: 16px;
   align-items: flex-start;
+}
+html[data-theme="dark"] .cs-privacy {
+  background: linear-gradient(135deg, rgba(129, 140, 248, 0.10), rgba(129, 140, 248, 0.04));
+  border: 1px solid rgba(129, 140, 248, 0.20);
 }
 .cs-privacy-icon {
   width: 44px;
@@ -1307,7 +1474,6 @@ details > div {
   font-weight: 600;
   color: var(--cs-text);
   margin-bottom: 4px;
-  letter-spacing: -0.01em;
 }
 .cs-privacy-body {
   font-size: 13.5px;
@@ -1323,8 +1489,11 @@ details > div {
   font-size: 12px;
   font-weight: 500;
 }
+html[data-theme="dark"] .cs-privacy-body code {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: var(--cs-accent) !important;
+}
 
-/* Config table */
 .cs-config {
   background: var(--cs-card);
   border: 1px solid var(--cs-border);
@@ -1371,28 +1540,81 @@ details > div {
   color: var(--cs-muted);
 }
 
-/* ---------- HIDE GRADIO BRANDING ---------- */
-footer.svelte-1ax1toq,
-footer.svelte-mpyp5e,
-footer[class*="svelte"] {
-  display: none !important;
+/* =========================================================
+ *  MARKDOWN
+ * ========================================================= */
+.gradio-container .markdown,
+.gradio-container .prose,
+.gradio-container [data-testid*="markdown"] {
+  color: var(--cs-text-2) !important;
 }
-.show-api,
-[data-testid="api-button"] {
-  display: none !important;
+.gradio-container .markdown *,
+.gradio-container .prose *,
+.gradio-container [data-testid*="markdown"] * {
+  color: inherit;
 }
-
-/* ---------- LINKS ---------- */
-.gradio-container a {
+.gradio-container .markdown p,
+.gradio-container .prose p {
+  color: var(--cs-text-2) !important;
+  font-size: 14px !important;
+  line-height: 1.65 !important;
+  margin: 8px 0 !important;
+}
+.gradio-container .markdown strong,
+.gradio-container .markdown b,
+.gradio-container .prose strong,
+.gradio-container .prose b,
+.gradio-container strong,
+.gradio-container b {
+  color: var(--cs-text) !important;
+  font-weight: 700 !important;
+}
+.gradio-container .markdown em,
+.gradio-container .prose em,
+.gradio-container em,
+.gradio-container i {
+  color: var(--cs-text-2) !important;
+  font-style: italic;
+}
+.gradio-container .markdown code,
+.gradio-container .prose code,
+.gradio-container p code,
+.gradio-container li code,
+.gradio-container span code {
+  background: var(--cs-accent-soft) !important;
   color: var(--cs-accent) !important;
-  text-decoration: none;
-  font-weight: 500;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace !important;
+  padding: 1px 7px !important;
+  border-radius: 5px !important;
+  font-size: 12.5px !important;
+  font-weight: 500 !important;
+  border: 1px solid var(--cs-border) !important;
 }
-.gradio-container a:hover {
-  text-decoration: underline;
+.gradio-container .markdown ul,
+.gradio-container .markdown ol,
+.gradio-container .prose ul,
+.gradio-container .prose ol {
+  color: var(--cs-text-2) !important;
+  padding-left: 24px !important;
+  margin: 10px 0 !important;
+}
+.gradio-container .markdown li,
+.gradio-container .prose li {
+  color: var(--cs-text-2) !important;
+  font-size: 14px !important;
+  line-height: 1.7 !important;
+  margin: 4px 0 !important;
+}
+.gradio-container .markdown hr,
+.gradio-container .prose hr {
+  border: 0 !important;
+  border-top: 1px solid var(--cs-border) !important;
+  margin: 24px 0 !important;
 }
 
-/* ---------- HEADINGS inside Markdown ---------- */
+/* =========================================================
+ *  HEADINGS
+ * ========================================================= */
 .gradio-container h1,
 .gradio-container h2,
 .gradio-container h3,
@@ -1410,104 +1632,34 @@ footer[class*="svelte"] {
   margin: 0 0 12px !important;
 }
 
-/* Tab content padding */
+/* =========================================================
+ *  LINKS
+ * ========================================================= */
+.gradio-container a {
+  color: var(--cs-accent) !important;
+  text-decoration: none;
+  font-weight: 500;
+}
+.gradio-container a:hover {
+  text-decoration: underline;
+}
+
+/* =========================================================
+ *  TAB CONTENT
+ * ========================================================= */
 [role="tabpanel"] {
   padding-top: 8px !important;
 }
 
-/* ---------- MARKDOWN CONTENT (About tab, status, etc.) ---------- */
-.gradio-container .markdown,
-.gradio-container .prose,
-.gradio-container [data-testid*="markdown"] {
-  color: var(--cs-text-2) !important;
+/* =========================================================
+ *  HIDE GRADIO BRANDING
+ * ========================================================= */
+footer.svelte-1ax1toq,
+footer.svelte-mpyp5e,
+footer[class*="svelte"] {
+  display: none !important;
 }
-
-.gradio-container .markdown *,
-.gradio-container .prose *,
-.gradio-container [data-testid*="markdown"] * {
-  color: inherit;
-}
-
-.gradio-container .markdown p,
-.gradio-container .prose p {
-  color: var(--cs-text-2) !important;
-  font-size: 14px !important;
-  line-height: 1.65 !important;
-  margin: 8px 0 !important;
-}
-
-/* CRITICAL FIX: <strong> / <b> were inheriting Gradio's dark-mode-strong
- * variable which renders ~white on light backgrounds. Force them dark. */
-.gradio-container .markdown strong,
-.gradio-container .markdown b,
-.gradio-container .prose strong,
-.gradio-container .prose b,
-.gradio-container strong,
-.gradio-container b {
-  color: var(--cs-text) !important;
-  font-weight: 700 !important;
-}
-
-.gradio-container .markdown em,
-.gradio-container .prose em,
-.gradio-container em,
-.gradio-container i {
-  color: var(--cs-text-2) !important;
-  font-style: italic;
-}
-
-/* Inline code inside Markdown — high contrast pill */
-.gradio-container .markdown code,
-.gradio-container .prose code,
-.gradio-container p code,
-.gradio-container li code,
-.gradio-container span code {
-  background: var(--cs-accent-soft) !important;
-  color: var(--cs-accent-2) !important;
-  font-family: ui-monospace, "SF Mono", Menlo, monospace !important;
-  padding: 1px 7px !important;
-  border-radius: 5px !important;
-  font-size: 12.5px !important;
-  font-weight: 500 !important;
-  border: 1px solid rgba(79, 70, 229, 0.12) !important;
-}
-
-/* Lists in Markdown */
-.gradio-container .markdown ul,
-.gradio-container .markdown ol,
-.gradio-container .prose ul,
-.gradio-container .prose ol {
-  color: var(--cs-text-2) !important;
-  padding-left: 24px !important;
-  margin: 10px 0 !important;
-}
-.gradio-container .markdown li,
-.gradio-container .prose li {
-  color: var(--cs-text-2) !important;
-  font-size: 14px !important;
-  line-height: 1.7 !important;
-  margin: 4px 0 !important;
-}
-.gradio-container .markdown li::marker,
-.gradio-container .prose li::marker {
-  color: var(--cs-faint) !important;
-}
-
-/* HR */
-.gradio-container .markdown hr,
-.gradio-container .prose hr {
-  border: 0 !important;
-  border-top: 1px solid var(--cs-border) !important;
-  margin: 24px 0 !important;
-}
-
-/* Block quote */
-.gradio-container .markdown blockquote,
-.gradio-container .prose blockquote {
-  border-left: 3px solid var(--cs-accent) !important;
-  background: var(--cs-accent-soft) !important;
-  padding: 12px 16px !important;
-  margin: 12px 0 !important;
-  border-radius: 0 var(--cs-radius-sm) var(--cs-radius-sm) 0 !important;
-  color: var(--cs-text-2) !important;
+.show-api,
+[data-testid="api-button"] {
+  display: none !important;
 }
