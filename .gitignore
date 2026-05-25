@@ -65,5 +65,8 @@ models/
 # Build artifacts (PDF rebuilt from docs/)
 build/
 
+# Office lock files (created when you open .pptx / .docx)
+~$*
+
 # Claude Code local config
 .claude/
