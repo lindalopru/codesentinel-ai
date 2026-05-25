@@ -16,6 +16,7 @@ click==8.1.7
 
 # --- Web UI ---
 gradio>=5.50,<6.0
+pywebview>=5,<7    # Native desktop window wrapper (cocoa on macOS, qt on Linux)
 
 # --- Static analyzers ---
 bandit==1.7.10

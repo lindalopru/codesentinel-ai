@@ -34,8 +34,11 @@ demo: .venv ## Run sample reviews on bundled buggy examples
 cli: .venv ## Show CLI help
 	$(PYTHON) -m cli.main --help
 
-web: .venv ## Launch Gradio web UI at http://127.0.0.1:7860
+web: .venv ## Launch Gradio web UI in browser at http://127.0.0.1:7860
 	$(PYTHON) -m web.app
+
+desktop: .venv ## Launch as native desktop app (own window, no browser)
+	$(PYTHON) -m web.desktop
 
 test: .venv ## Run pytest with coverage
 	$(PYTHON) -m pytest --cov=codesentinel --cov-report=term-missing

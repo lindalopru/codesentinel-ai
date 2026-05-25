@@ -16,8 +16,16 @@ cd codesentinel-ai
 bash setup.sh                # installs Ollama, pulls model (~5 GB), creates venv
 source .venv/bin/activate
 make demo                    # CLI demo on bundled buggy fixtures
-make web                     # launch web UI at http://127.0.0.1:7860
+make desktop                 # native desktop window (own app, no browser)
+make web                     # alternative: web UI at http://127.0.0.1:7860
 ```
+
+> 💡 **Three ways to use it:**
+> - `make desktop` — native window, looks like a real Mac/Linux app
+> - `make web` — same UI but in your browser
+> - `codesentinel review …` — terminal CLI for scripts and CI
+>
+> On macOS you can also **double-click `Launch_CodeSentinel.command`** from Finder.
 
 ---
 
@@ -46,7 +54,14 @@ codesentinel models
 codesentinel doctor
 ```
 
-### Web (Gradio)
+### Desktop app (pywebview, native window)
+```bash
+make desktop                          # from the venv
+# or double-click Launch_CodeSentinel.command from Finder
+```
+Opens a native macOS / Linux window with the full UI inside — no browser.
+
+### Browser (Gradio)
 ```bash
 make web
 ```
