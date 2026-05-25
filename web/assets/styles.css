@@ -918,6 +918,244 @@ input[type="checkbox"] {
 }
 .cs-footer b { color: var(--cs-muted) !important; font-weight: 500; }
 
+/* ---------- ABOUT TAB (redesigned with cards) ---------- */
+.cs-about {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding: 4px 0;
+}
+.cs-about-section {
+  display: block;
+}
+.cs-about-title {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.10em !important;
+  color: var(--cs-muted) !important;
+  margin: 0 0 16px !important;
+}
+.cs-about-lead {
+  font-size: 14.5px;
+  color: var(--cs-text-2);
+  line-height: 1.65;
+  margin: 0 0 20px;
+}
+.cs-about-lead code {
+  background: var(--cs-accent-soft) !important;
+  color: var(--cs-accent-2) !important;
+  padding: 1px 7px;
+  border-radius: 5px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 12.5px;
+  font-weight: 500;
+  border: 1px solid rgba(79, 70, 229, 0.12);
+}
+
+/* Feature cards (Seguridad / Bugs / Performance / Estilo / Documentación) */
+.cs-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+}
+.cs-feature {
+  display: flex;
+  gap: 14px;
+  padding: 16px;
+  background: var(--cs-card);
+  border: 1px solid var(--cs-border);
+  border-radius: var(--cs-radius);
+  box-shadow: var(--cs-shadow-sm);
+  transition: all 0.15s ease;
+  align-items: flex-start;
+}
+.cs-feature:hover {
+  border-color: var(--cs-border-2);
+  box-shadow: var(--cs-shadow);
+  transform: translateY(-1px);
+}
+.cs-feature-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.cs-feature-icon svg {
+  width: 18px;
+  height: 18px;
+  stroke: white;
+}
+.cs-feature-icon.sev-critical { background: var(--cs-critical); }
+.cs-feature-icon.sev-high     { background: var(--cs-high); }
+.cs-feature-icon.sev-medium   { background: var(--cs-medium); }
+.cs-feature-icon.sev-low      { background: var(--cs-low); }
+.cs-feature-icon.sev-info     { background: var(--cs-info); }
+
+.cs-feature-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--cs-text);
+  margin-bottom: 2px;
+  letter-spacing: -0.005em;
+}
+.cs-feature-body {
+  font-size: 13px;
+  color: var(--cs-muted);
+  line-height: 1.5;
+}
+
+/* Usage steps (1/2/3) */
+.cs-usage-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+}
+.cs-usage {
+  display: flex;
+  gap: 14px;
+  padding: 18px;
+  background: var(--cs-card);
+  border: 1px solid var(--cs-border);
+  border-radius: var(--cs-radius);
+  box-shadow: var(--cs-shadow-sm);
+  align-items: flex-start;
+}
+.cs-usage-num {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: var(--cs-accent-soft);
+  color: var(--cs-accent) !important;
+  font-weight: 700;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+.cs-usage-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--cs-text);
+  margin-bottom: 4px;
+  letter-spacing: -0.005em;
+}
+.cs-usage-body {
+  font-size: 13px;
+  color: var(--cs-muted);
+  line-height: 1.5;
+}
+.cs-usage-body code {
+  background: var(--cs-bg-2) !important;
+  color: var(--cs-text-2) !important;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--cs-border);
+}
+
+/* Privacy banner */
+.cs-privacy {
+  background: linear-gradient(135deg, var(--cs-accent-soft), rgba(79, 70, 229, 0.04));
+  border: 1px solid rgba(79, 70, 229, 0.18);
+  border-radius: var(--cs-radius);
+  padding: 20px 22px;
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.cs-privacy-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--cs-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px -2px rgba(79, 70, 229, 0.4);
+}
+.cs-privacy-icon svg {
+  width: 22px;
+  height: 22px;
+  stroke: white;
+}
+.cs-privacy-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--cs-text);
+  margin-bottom: 4px;
+  letter-spacing: -0.01em;
+}
+.cs-privacy-body {
+  font-size: 13.5px;
+  color: var(--cs-text-2);
+  line-height: 1.6;
+}
+.cs-privacy-body code {
+  background: rgba(255, 255, 255, 0.6) !important;
+  color: var(--cs-accent-2) !important;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Config table */
+.cs-config {
+  background: var(--cs-card);
+  border: 1px solid var(--cs-border);
+  border-radius: var(--cs-radius);
+  overflow: hidden;
+  box-shadow: var(--cs-shadow-sm);
+}
+.cs-config-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--cs-border);
+  gap: 16px;
+}
+.cs-config-row:last-child { border-bottom: 0; }
+.cs-config-key {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--cs-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.cs-config-val code {
+  background: var(--cs-bg-2) !important;
+  color: var(--cs-text) !important;
+  padding: 3px 9px;
+  border-radius: 5px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 12.5px;
+  font-weight: 500;
+  border: 1px solid var(--cs-border);
+}
+
+.cs-about-credit {
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--cs-faint);
+  margin: 8px 0 0 !important;
+  padding-top: 16px;
+  border-top: 1px solid var(--cs-border);
+}
+.cs-about-credit i {
+  color: var(--cs-muted);
+}
+
 /* ---------- HIDE GRADIO BRANDING ---------- */
 footer.svelte-1ax1toq,
 footer.svelte-mpyp5e,
@@ -962,12 +1200,99 @@ footer[class*="svelte"] {
   padding-top: 8px !important;
 }
 
-/* Markdown inside cells */
+/* ---------- MARKDOWN CONTENT (About tab, status, etc.) ---------- */
 .gradio-container .markdown,
-.gradio-container .prose {
-  color: var(--cs-text) !important;
+.gradio-container .prose,
+.gradio-container [data-testid*="markdown"] {
+  color: var(--cs-text-2) !important;
 }
+
+.gradio-container .markdown *,
+.gradio-container .prose *,
+.gradio-container [data-testid*="markdown"] * {
+  color: inherit;
+}
+
 .gradio-container .markdown p,
 .gradio-container .prose p {
+  color: var(--cs-text-2) !important;
+  font-size: 14px !important;
+  line-height: 1.65 !important;
+  margin: 8px 0 !important;
+}
+
+/* CRITICAL FIX: <strong> / <b> were inheriting Gradio's dark-mode-strong
+ * variable which renders ~white on light backgrounds. Force them dark. */
+.gradio-container .markdown strong,
+.gradio-container .markdown b,
+.gradio-container .prose strong,
+.gradio-container .prose b,
+.gradio-container strong,
+.gradio-container b {
+  color: var(--cs-text) !important;
+  font-weight: 700 !important;
+}
+
+.gradio-container .markdown em,
+.gradio-container .prose em,
+.gradio-container em,
+.gradio-container i {
+  color: var(--cs-text-2) !important;
+  font-style: italic;
+}
+
+/* Inline code inside Markdown — high contrast pill */
+.gradio-container .markdown code,
+.gradio-container .prose code,
+.gradio-container p code,
+.gradio-container li code,
+.gradio-container span code {
+  background: var(--cs-accent-soft) !important;
+  color: var(--cs-accent-2) !important;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace !important;
+  padding: 1px 7px !important;
+  border-radius: 5px !important;
+  font-size: 12.5px !important;
+  font-weight: 500 !important;
+  border: 1px solid rgba(79, 70, 229, 0.12) !important;
+}
+
+/* Lists in Markdown */
+.gradio-container .markdown ul,
+.gradio-container .markdown ol,
+.gradio-container .prose ul,
+.gradio-container .prose ol {
+  color: var(--cs-text-2) !important;
+  padding-left: 24px !important;
+  margin: 10px 0 !important;
+}
+.gradio-container .markdown li,
+.gradio-container .prose li {
+  color: var(--cs-text-2) !important;
+  font-size: 14px !important;
+  line-height: 1.7 !important;
+  margin: 4px 0 !important;
+}
+.gradio-container .markdown li::marker,
+.gradio-container .prose li::marker {
+  color: var(--cs-faint) !important;
+}
+
+/* HR */
+.gradio-container .markdown hr,
+.gradio-container .prose hr {
+  border: 0 !important;
+  border-top: 1px solid var(--cs-border) !important;
+  margin: 24px 0 !important;
+}
+
+/* Block quote */
+.gradio-container .markdown blockquote,
+.gradio-container .prose blockquote {
+  border-left: 3px solid var(--cs-accent) !important;
+  background: var(--cs-accent-soft) !important;
+  padding: 12px 16px !important;
+  margin: 12px 0 !important;
+  border-radius: 0 var(--cs-radius-sm) var(--cs-radius-sm) 0 !important;
   color: var(--cs-text-2) !important;
 }

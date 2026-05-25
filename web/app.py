@@ -87,38 +87,138 @@ HERO_HTML = f"""
 </div>
 """
 
-ABOUT_MD = f"""
-### Cómo funciona
+ABOUT_HTML = f"""
+<div class='cs-about'>
 
-CodeSentinel combina un **modelo de lenguaje local** (Qwen2.5-Coder 7B vía Ollama) con
-**analizadores estáticos clásicos** (bandit, ruff, ESLint) para detectar:
+  <section class='cs-about-section'>
+    <h3 class='cs-about-title'>Cómo funciona</h3>
+    <p class='cs-about-lead'>
+      CodeSentinel combina un modelo de lenguaje local
+      <code>Qwen2.5-Coder 7B</code> vía Ollama con analizadores estáticos clásicos
+      (<code>bandit</code>, <code>ruff</code>, <code>ESLint</code>) para detectar problemas en el código.
+    </p>
 
-- 🚨 **Vulnerabilidades de seguridad** — SQL injection, XSS, eval(), secretos hardcoded
-- 🐞 **Bugs** — default args mutables, NPE risk, recursos no cerrados
-- ⚡ **Performance** — bucles N+1, I/O bloqueante
-- 🎨 **Estilo** — imports sin usar, código muerto, convenciones
-- 📚 **Documentación** — docstrings y comentarios faltantes
+    <div class='cs-feature-grid'>
+      <div class='cs-feature'>
+        <div class='cs-feature-icon sev-critical'>
+          <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 9v4'/><path d='M12 17h.01'/><path d='M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z'/></svg>
+        </div>
+        <div>
+          <div class='cs-feature-title'>Seguridad</div>
+          <div class='cs-feature-body'>SQL injection · XSS · eval() · secretos hardcoded</div>
+        </div>
+      </div>
 
-### Tres formas de usarlo
+      <div class='cs-feature'>
+        <div class='cs-feature-icon sev-high'>
+          <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m8 2 1.88 1.88'/><path d='M14.12 3.88 16 2'/><path d='M9 7.13v-1a3.003 3.003 0 1 1 6 0v1'/><path d='M12 20c-3.3 0-6-2.7-6-6v-3a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v3c0 3.3-2.7 6-6 6'/><path d='M12 20v-9'/><path d='M6.53 9C4.6 8.8 3 7.1 3 5'/><path d='M6 13H2'/><path d='M3 21c0-2.1 1.7-3.9 3.8-4'/><path d='M20.97 5c0 2.1-1.6 3.8-3.5 4'/><path d='M22 13h-4'/><path d='M17.2 17c2.1.1 3.8 1.9 3.8 4'/></svg>
+        </div>
+        <div>
+          <div class='cs-feature-title'>Bugs</div>
+          <div class='cs-feature-body'>Default args mutables · NPE · recursos no cerrados</div>
+        </div>
+      </div>
 
-1. **Esta interfaz** (lo que estás viendo) — sube archivo, pega código o revisa un diff de git.
-2. **CLI en terminal** — `codesentinel review archivo.py`
-3. **App de escritorio** — `make desktop` o doble-clic en `Launch_CodeSentinel.command`
+      <div class='cs-feature'>
+        <div class='cs-feature-icon sev-medium'>
+          <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M13 2 3 14h9l-1 8 10-12h-9l1-8z'/></svg>
+        </div>
+        <div>
+          <div class='cs-feature-title'>Performance</div>
+          <div class='cs-feature-body'>Bucles N+1 · I/O bloqueante · queries lentas</div>
+        </div>
+      </div>
 
-### Privacidad
+      <div class='cs-feature'>
+        <div class='cs-feature-icon sev-low'>
+          <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 19l7-7 3 3-7 7-3-3z'/><path d='M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z'/><path d='M2 2l7.586 7.586'/><circle cx='11' cy='11' r='2'/></svg>
+        </div>
+        <div>
+          <div class='cs-feature-title'>Estilo</div>
+          <div class='cs-feature-body'>Imports sin usar · código muerto · convenciones</div>
+        </div>
+      </div>
 
-Ningún byte de tu código sale de tu Mac. La única conexión de red es `127.0.0.1:11434`
-hacia el daemon de Ollama, que corre completamente local.
+      <div class='cs-feature'>
+        <div class='cs-feature-icon sev-info'>
+          <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z'/><path d='M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z'/></svg>
+        </div>
+        <div>
+          <div class='cs-feature-title'>Documentación</div>
+          <div class='cs-feature-body'>Docstrings · comentarios · API docs faltantes</div>
+        </div>
+      </div>
+    </div>
+  </section>
 
----
+  <section class='cs-about-section'>
+    <h3 class='cs-about-title'>Tres formas de usarlo</h3>
+    <div class='cs-usage-grid'>
+      <div class='cs-usage'>
+        <div class='cs-usage-num'>1</div>
+        <div>
+          <div class='cs-usage-title'>Esta interfaz</div>
+          <div class='cs-usage-body'>Lo que estás viendo. Sube archivo, pega código o revisa un diff.</div>
+        </div>
+      </div>
+      <div class='cs-usage'>
+        <div class='cs-usage-num'>2</div>
+        <div>
+          <div class='cs-usage-title'>Terminal</div>
+          <div class='cs-usage-body'><code>codesentinel review archivo.py</code></div>
+        </div>
+      </div>
+      <div class='cs-usage'>
+        <div class='cs-usage-num'>3</div>
+        <div>
+          <div class='cs-usage-title'>App de escritorio</div>
+          <div class='cs-usage-body'><code>make desktop</code> o doble-clic en <code>Launch_CodeSentinel.command</code></div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-**Configuración actual**
-- Modelo: `{_settings.ollama_model}`
-- Host: `{_settings.ollama_host}`
-- Context window: `{_settings.ollama_num_ctx:,}` tokens
-- Versión: **v{__version__}**
+  <section class='cs-about-section'>
+    <div class='cs-privacy'>
+      <div class='cs-privacy-icon'>
+        <svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect width='18' height='11' x='3' y='11' rx='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4'/></svg>
+      </div>
+      <div>
+        <div class='cs-privacy-title'>100% privado</div>
+        <div class='cs-privacy-body'>
+          Ningún byte de tu código sale de tu Mac. La única conexión de red es
+          <code>127.0.0.1:11434</code> hacia el daemon de Ollama, que corre completamente local.
+        </div>
+      </div>
+    </div>
+  </section>
 
-Proyecto 2 de *Inteligencia Artificial* — Universidad Surcolombiana (USCO).
+  <section class='cs-about-section'>
+    <h3 class='cs-about-title'>Configuración</h3>
+    <div class='cs-config'>
+      <div class='cs-config-row'>
+        <span class='cs-config-key'>Modelo</span>
+        <span class='cs-config-val'><code>{_settings.ollama_model}</code></span>
+      </div>
+      <div class='cs-config-row'>
+        <span class='cs-config-key'>Host</span>
+        <span class='cs-config-val'><code>{_settings.ollama_host}</code></span>
+      </div>
+      <div class='cs-config-row'>
+        <span class='cs-config-key'>Context window</span>
+        <span class='cs-config-val'><code>{_settings.ollama_num_ctx:,} tokens</code></span>
+      </div>
+      <div class='cs-config-row'>
+        <span class='cs-config-key'>Versión</span>
+        <span class='cs-config-val'><code>v{__version__}</code></span>
+      </div>
+    </div>
+  </section>
+
+  <p class='cs-about-credit'>
+    Proyecto 2 de <i>Inteligencia Artificial</i> · Universidad Surcolombiana (USCO).
+  </p>
+</div>
 """
 
 FOOTER_HTML = f"""
@@ -311,7 +411,7 @@ def build_ui() -> gr.Blocks:
 
             # ---------- Tab 4: About ----------
             with gr.Tab("Acerca"):
-                gr.Markdown(ABOUT_MD)
+                gr.HTML(ABOUT_HTML)
 
         # ---------- Status bar ----------
         status = gr.Markdown(
