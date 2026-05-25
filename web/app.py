@@ -1,7 +1,8 @@
-"""CodeSentinel AI — Gradio web UI."""
+"""CodeSentinel AI — Gradio web UI, premium edition."""
 
 from __future__ import annotations
 
+import os
 import tempfile
 from datetime import datetime
 from pathlib import Path
@@ -15,7 +16,12 @@ from codesentinel.llm.client import OllamaClient
 from codesentinel.reporting import to_markdown
 from codesentinel.review import ReviewEngine
 from codesentinel.schema import ReviewResult, Severity
-from web.components import render_findings_html, severity_counts
+from web.components import (
+    EMPTY_STATE,
+    SEVERITY_LEGEND_HTML,
+    render_findings_html,
+    render_stats_html,
+)
 
 # -------- shared state --------
 
@@ -23,33 +29,118 @@ _settings = get_settings()
 _client = OllamaClient(_settings)
 _engine = ReviewEngine(client=_client, settings=_settings)
 
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 CSS_PATH = Path(__file__).parent / "assets" / "styles.css"
 CSS = CSS_PATH.read_text(encoding="utf-8") if CSS_PATH.exists() else ""
 
 LANGUAGE_CHOICES = ["auto"] + sorted({v for v in EXTENSION_MAP.values()})
 SEVERITY_CHOICES = [s.value for s in Severity]
 
-ABOUT_MD = f"""
-## CodeSentinel AI v{__version__}
+# -------- sample fixtures (used by quick-start chips) --------
 
-**Local AI Code Reviewer** — Runs entirely on your Mac via Ollama + Qwen2.5-Coder.
-No code leaves your machine. No API keys. No cloud.
+SAMPLES_DIR = PROJECT_ROOT / "examples"
 
-- **Model in use:** `{_settings.ollama_model}`
-- **Ollama host:** `{_settings.ollama_host}`
-- **Context window:** `{_settings.ollama_num_ctx}` tokens
+SAMPLES = {
+    "python": ("buggy_python.py", "python"),
+    "javascript": ("insecure_js.js", "javascript"),
+    "typescript": ("messy_typescript.ts", "typescript"),
+    "java": ("legacy_java.java", "java"),
+}
 
-### Features
-- Detects bugs, security issues, performance problems, style violations, and missing docs.
-- Augments the LLM with classic static analysers (bandit, ruff, ESLint) to ground findings.
-- Five severity levels: critical · high · medium · low · info.
-- Multi-language: Python, JavaScript, TypeScript, Java, Go, Rust, and more.
-- Three modes: single file, paste-and-go, git diff.
 
-Built for Project 2 of *Inteligencia Artificial*, USCO.
+def _read_sample(key: str) -> tuple[str, str]:
+    fname, lang = SAMPLES[key]
+    p = SAMPLES_DIR / fname
+    if not p.exists():
+        return ("", lang)
+    return (p.read_text(encoding="utf-8", errors="replace"), lang)
+
+
+# -------- HERO HTML --------
+
+HERO_HTML = f"""
+<div class='cs-hero'>
+  <div class='cs-hero-row'>
+    <div class='cs-hero-brand'>
+      <div class='cs-hero-logo'>CS</div>
+      <div>
+        <h1 class='cs-hero-title'>CodeSentinel AI</h1>
+        <p class='cs-hero-subtitle'>Revisor de código con IA · 100% en tu Mac</p>
+      </div>
+    </div>
+    <div class='cs-hero-pills'>
+      <span class='cs-pill'><span class='dot'></span> Local · sin red</span>
+      <span class='cs-pill'>{_settings.ollama_model.split(':')[0]}</span>
+      <span class='cs-pill'>v{__version__}</span>
+    </div>
+  </div>
+</div>
 """
 
-# -------- handlers --------
+ABOUT_MD = f"""
+### Cómo funciona
+
+CodeSentinel combina un **modelo de lenguaje local** (Qwen2.5-Coder 7B vía Ollama) con
+**analizadores estáticos clásicos** (bandit, ruff, ESLint) para detectar:
+
+- 🚨 **Vulnerabilidades de seguridad** — SQL injection, XSS, eval(), secretos hardcoded
+- 🐞 **Bugs** — default args mutables, NPE risk, recursos no cerrados
+- ⚡ **Performance** — bucles N+1, I/O bloqueante
+- 🎨 **Estilo** — imports sin usar, código muerto, convenciones
+- 📚 **Documentación** — docstrings y comentarios faltantes
+
+### Tres formas de usarlo
+
+1. **Esta interfaz** (lo que estás viendo) — sube archivo, pega código o revisa un diff de git.
+2. **CLI en terminal** — `codesentinel review archivo.py`
+3. **App de escritorio** — `make desktop` o doble-clic en `Launch_CodeSentinel.command`
+
+### Privacidad
+
+Ningún byte de tu código sale de tu Mac. La única conexión de red es `127.0.0.1:11434`
+hacia el daemon de Ollama, que corre completamente local.
+
+---
+
+**Configuración actual**
+- Modelo: `{_settings.ollama_model}`
+- Host: `{_settings.ollama_host}`
+- Context window: `{_settings.ollama_num_ctx:,}` tokens
+- Versión: **v{__version__}**
+
+Proyecto 2 de *Inteligencia Artificial* — Universidad Surcolombiana (USCO).
+"""
+
+FOOTER_HTML = """
+<div class='cs-footer'>
+  <b>Linda Valentina Lopez Rubiano</b> · <b>Juan Felipe Andrade</b><br/>
+  Universidad Surcolombiana · Inteligencia Artificial · 2026
+</div>
+"""
+
+PASTE_PLACEHOLDER = """# Pega tu código aquí…
+# O haz clic en uno de los ejemplos de arriba para probar.
+
+def get_user(uid):
+    query = "SELECT * FROM users WHERE id = " + str(uid)
+    return db.execute(query)
+"""
+
+# -------- model loaders --------
+
+
+def _resolve_client(selected_model: str) -> OllamaClient:
+    selected = (selected_model or "").strip()
+    if not selected or selected == _settings.ollama_model:
+        return _client
+    return OllamaClient(_settings, model=selected)
+
+
+def _resolve_engine(selected_model: str) -> ReviewEngine:
+    c = _resolve_client(selected_model)
+    if c is _client:
+        return _engine
+    return ReviewEngine(client=c, settings=_settings)
 
 
 def _save_md_report(results: ReviewResult | list[ReviewResult]) -> str:
@@ -60,25 +151,26 @@ def _save_md_report(results: ReviewResult | list[ReviewResult]) -> str:
     return str(tmp)
 
 
-def _resolve_model(selected: str) -> OllamaClient:
-    selected = (selected or "").strip()
-    if not selected or selected == _settings.ollama_model:
-        return _client
-    return OllamaClient(_settings, model=selected)
+def _empty_outputs():
+    return (
+        EMPTY_STATE,
+        render_stats_html(ReviewResult(file_path="", language="auto")),
+        None,
+        "Listo cuando tú lo estés.",
+    )
 
 
-def _resolve_engine(selected_model: str) -> ReviewEngine:
-    c = _resolve_model(selected_model)
-    if c is _client:
-        return _engine
-    return ReviewEngine(client=c, settings=_settings)
+# -------- handlers --------
 
 
 def review_uploaded_file(
     file_obj, model: str, language: str, min_sev: str, use_static: bool
 ):
     if file_obj is None:
-        return "<i>Upload a file to begin.</i>", [], None, "Idle."
+        return ("<div class='cs-status'>⬆️ Sube un archivo para empezar.</div>",
+                render_stats_html(ReviewResult(file_path="", language="auto")),
+                None,
+                "Listo.")
     path = Path(file_obj.name)
     engine = _resolve_engine(model)
     result = engine.review_file(path, use_static=use_static)
@@ -86,11 +178,12 @@ def review_uploaded_file(
         result.language = language
     result = result.filter_by_severity(Severity(min_sev))
     md_path = _save_md_report(result)
+    n = len(result.findings)
     return (
         render_findings_html(result),
-        severity_counts(result),
+        render_stats_html(result),
         md_path,
-        f"Done in {result.duration_s:.1f}s · {len(result.findings)} finding(s).",
+        f"✓ Revisado en {result.duration_s:.1f}s · {n} hallazgo(s).",
     )
 
 
@@ -98,10 +191,12 @@ def review_pasted_code(
     code: str, model: str, language: str, min_sev: str, use_static: bool
 ):
     if not code or not code.strip():
-        return "<i>Paste some code to begin.</i>", [], None, "Idle."
+        return ("<div class='cs-status'>📝 Pega código o usa un ejemplo de arriba.</div>",
+                render_stats_html(ReviewResult(file_path="", language="auto")),
+                None,
+                "Listo.")
     lang = language if language and language != "auto" else "python"
     engine = _resolve_engine(model)
-    # Static analyzers need a real file path; write to a temp file so bandit/ruff can run.
     if use_static:
         ext = next((e for e, name in EXTENSION_MAP.items() if name == lang), ".txt")
         tmp = Path(tempfile.mkdtemp()) / f"pasted{ext}"
@@ -112,33 +207,40 @@ def review_pasted_code(
         result = engine.review_source(code, language=lang, file_path="pasted snippet", use_static=False)
     result = result.filter_by_severity(Severity(min_sev))
     md_path = _save_md_report(result)
+    n = len(result.findings)
     return (
         render_findings_html(result),
-        severity_counts(result),
+        render_stats_html(result),
         md_path,
-        f"Done in {result.duration_s:.1f}s · {len(result.findings)} finding(s).",
+        f"✓ Revisado en {result.duration_s:.1f}s · {n} hallazgo(s).",
     )
 
 
 def review_git_diff_handler(repo_path: str, ref: str, staged: bool, model: str, min_sev: str, use_static: bool):
     if not repo_path or not Path(repo_path).exists():
-        return "<i>Provide a valid repository path.</i>", [], None, "Idle."
+        return ("<div class='cs-status'>📁 Provee la ruta a un repositorio git válido.</div>",
+                render_stats_html(ReviewResult(file_path="", language="auto")),
+                None,
+                "Listo.")
     engine = _resolve_engine(model)
     results = engine.review_diff(Path(repo_path), ref=ref or "HEAD", staged=staged, use_static=use_static)
     if not results:
-        return "<div class='summary-banner'>No reviewable changes detected.</div>", [], None, "Done."
+        return ("<div class='cs-status'>✨ No hay cambios revisables en el diff.</div>",
+                render_stats_html(ReviewResult(file_path="", language="auto")),
+                None,
+                "Sin cambios.")
     results = [r.filter_by_severity(Severity(min_sev)) for r in results]
     md_path = _save_md_report(results)
-    total_findings = sum(len(r.findings) for r in results)
+    total = sum(len(r.findings) for r in results)
     return (
         render_findings_html(results),
-        severity_counts(results),
+        render_stats_html(results),
         md_path,
-        f"Reviewed {len(results)} file(s), {total_findings} finding(s).",
+        f"✓ {len(results)} archivo(s) · {total} hallazgo(s).",
     )
 
 
-# -------- UI layout --------
+# -------- UI --------
 
 
 def build_ui() -> gr.Blocks:
@@ -146,68 +248,150 @@ def build_ui() -> gr.Blocks:
     model_choices = pulled if pulled else [_settings.ollama_model]
     default_model = _settings.ollama_model if _settings.ollama_model in model_choices else model_choices[0]
 
-    with gr.Blocks(title="CodeSentinel AI", theme=gr.themes.Soft(), css=CSS) as demo:
-        gr.Markdown(
-            f"# 🛡️ CodeSentinel AI\n"
-            f"*Local AI Code Reviewer · running on `{_settings.ollama_model}` via Ollama · v{__version__}*"
-        )
+    theme = gr.themes.Soft(
+        primary_hue="indigo",
+        secondary_hue="slate",
+        neutral_hue="slate",
+        radius_size=gr.themes.sizes.radius_md,
+        spacing_size=gr.themes.sizes.spacing_md,
+    )
 
-        with gr.Row():
-            model_dd = gr.Dropdown(choices=model_choices, value=default_model, label="Model", scale=2)
-            lang_dd = gr.Dropdown(choices=LANGUAGE_CHOICES, value="auto", label="Language", scale=1)
-            sev_dd = gr.Dropdown(choices=SEVERITY_CHOICES, value="info", label="Min severity", scale=1)
-            static_cb = gr.Checkbox(value=True, label="Augment with static analyzers", scale=1)
+    with gr.Blocks(
+        title="CodeSentinel AI",
+        theme=theme,
+        css=CSS,
+        analytics_enabled=False,
+    ) as demo:
 
-        with gr.Tabs():
-            with gr.Tab("📁 Upload file"):
-                file_in = gr.File(file_types=[".py", ".js", ".jsx", ".ts", ".tsx", ".java", ".go", ".rs", ".rb", ".php", ".kt", ".cpp", ".c"], label="Source file")
-                file_btn = gr.Button("🔍 Review file", variant="primary")
+        # Hero
+        gr.HTML(HERO_HTML)
 
-            with gr.Tab("📝 Paste code"):
-                code_in = gr.Code(language="python", lines=18, label="Paste code here")
-                paste_btn = gr.Button("🔍 Review code", variant="primary")
+        # Main tabs
+        with gr.Tabs(elem_id="cs-tabs"):
 
-            with gr.Tab("🔀 Git diff"):
+            # ---------- Tab 1: Paste code ----------
+            with gr.Tab("📝  Pegar código"):
+                gr.Markdown(
+                    "**Prueba con un ejemplo** o pega tu propio código.",
+                    elem_id="cs-paste-intro",
+                )
+
+                with gr.Row(elem_classes="cs-samples-row"):
+                    sample_py = gr.Button("🐍 Bug Python", size="sm", elem_classes="cs-sample-btn")
+                    sample_js = gr.Button("⚡ XSS en JS", size="sm", elem_classes="cs-sample-btn")
+                    sample_ts = gr.Button("📘 TS sucio", size="sm", elem_classes="cs-sample-btn")
+                    sample_java = gr.Button("☕ Java legacy", size="sm", elem_classes="cs-sample-btn")
+
+                code_in = gr.Code(
+                    label="Tu código",
+                    language="python",
+                    lines=16,
+                    value=PASTE_PLACEHOLDER,
+                )
+
                 with gr.Row():
-                    repo_in = gr.Textbox(label="Repository path", value=str(Path.cwd()))
-                    ref_in = gr.Textbox(label="Compare to ref", value="HEAD")
-                    staged_cb = gr.Checkbox(value=False, label="Staged only")
-                diff_btn = gr.Button("🔍 Review diff", variant="primary")
+                    paste_btn = gr.Button("🔍  Revisar código", variant="primary", size="lg", scale=2)
 
-            with gr.Tab("ℹ️ About"):
+            # ---------- Tab 2: Upload file ----------
+            with gr.Tab("📂  Subir archivo"):
+                gr.Markdown("Sube cualquier archivo de código fuente. Detectamos el lenguaje automáticamente.")
+                file_in = gr.File(
+                    file_types=[".py", ".js", ".jsx", ".ts", ".tsx", ".java", ".go", ".rs", ".rb", ".php", ".kt", ".cpp", ".c"],
+                    label="Archivo de código",
+                )
+                file_btn = gr.Button("🔍  Revisar archivo", variant="primary", size="lg")
+
+            # ---------- Tab 3: Git diff ----------
+            with gr.Tab("🔀  Git diff"):
+                gr.Markdown("Revisa solo las líneas cambiadas en un repositorio.")
+                with gr.Row():
+                    repo_in = gr.Textbox(label="Ruta al repositorio", value=str(Path.cwd()), scale=3)
+                    ref_in = gr.Textbox(label="Comparar contra", value="HEAD", scale=1)
+                    staged_cb = gr.Checkbox(value=False, label="Solo staged", scale=1)
+                diff_btn = gr.Button("🔍  Revisar diff", variant="primary", size="lg")
+
+            # ---------- Tab 4: About ----------
+            with gr.Tab("ℹ️  Acerca de"):
                 gr.Markdown(ABOUT_MD)
 
-        status = gr.Markdown(value="_Idle._")
+        # ---------- Status bar ----------
+        status = gr.Markdown(
+            "Listo cuando tú lo estés.",
+            elem_id="cs-status-md",
+        )
 
-        with gr.Row():
+        # ---------- Results section ----------
+        with gr.Row(equal_height=False):
             with gr.Column(scale=2):
-                findings_out = gr.HTML(label="Findings", value="<div class='summary-banner'>Findings will appear here.</div>")
-            with gr.Column(scale=1):
-                counts_out = gr.Dataframe(
-                    headers=["Severity", "Count"],
-                    label="Totals by severity",
-                    interactive=False,
-                    value=[["CRITICAL", 0], ["HIGH", 0], ["MEDIUM", 0], ["LOW", 0], ["INFO", 0]],
-                )
-                report_dl = gr.File(label="Download Markdown report", interactive=False)
+                gr.Markdown("### Hallazgos")
+                gr.HTML(SEVERITY_LEGEND_HTML)
+                findings_out = gr.HTML(value=EMPTY_STATE)
 
-        file_btn.click(
-            review_uploaded_file,
-            inputs=[file_in, model_dd, lang_dd, sev_dd, static_cb],
+            with gr.Column(scale=1):
+                gr.Markdown("### Resumen")
+                counts_out = gr.HTML(
+                    value=render_stats_html(ReviewResult(file_path="", language="auto"))
+                )
+                gr.Markdown("&nbsp;")
+                report_dl = gr.File(label="📄 Reporte Markdown", interactive=False)
+
+                # Filter (compact)
+                with gr.Group():
+                    min_sev_dd = gr.Dropdown(
+                        choices=SEVERITY_CHOICES,
+                        value="info",
+                        label="Severidad mínima a mostrar",
+                        interactive=True,
+                    )
+
+        # ---------- Advanced settings (collapsed) ----------
+        with gr.Accordion("⚙️  Opciones avanzadas", open=False), gr.Row():
+            model_dd = gr.Dropdown(
+                choices=model_choices,
+                value=default_model,
+                label="Modelo LLM",
+                info="Modelos que has descargado con `ollama pull`",
+            )
+            lang_dd = gr.Dropdown(
+                choices=LANGUAGE_CHOICES,
+                value="auto",
+                label="Lenguaje",
+                info="Solo necesario al pegar código",
+            )
+            static_cb = gr.Checkbox(
+                value=True,
+                label="Aumentar con analizadores estáticos",
+                info="Combina LLM con bandit/ruff/ESLint",
+            )
+
+        # ---------- Footer ----------
+        gr.HTML(FOOTER_HTML)
+
+        # ---------- Wiring ----------
+        # Sample buttons
+        sample_py.click(lambda: _read_sample("python"), outputs=[code_in, lang_dd])
+        sample_js.click(lambda: _read_sample("javascript"), outputs=[code_in, lang_dd])
+        sample_ts.click(lambda: _read_sample("typescript"), outputs=[code_in, lang_dd])
+        sample_java.click(lambda: _read_sample("java"), outputs=[code_in, lang_dd])
+
+        # Main review handlers
+        paste_btn.click(
+            review_pasted_code,
+            inputs=[code_in, model_dd, lang_dd, min_sev_dd, static_cb],
             outputs=[findings_out, counts_out, report_dl, status],
             queue=True,
             show_progress="full",
         )
-        paste_btn.click(
-            review_pasted_code,
-            inputs=[code_in, model_dd, lang_dd, sev_dd, static_cb],
+        file_btn.click(
+            review_uploaded_file,
+            inputs=[file_in, model_dd, lang_dd, min_sev_dd, static_cb],
             outputs=[findings_out, counts_out, report_dl, status],
             queue=True,
             show_progress="full",
         )
         diff_btn.click(
             review_git_diff_handler,
-            inputs=[repo_in, ref_in, staged_cb, model_dd, sev_dd, static_cb],
+            inputs=[repo_in, ref_in, staged_cb, model_dd, min_sev_dd, static_cb],
             outputs=[findings_out, counts_out, report_dl, status],
             queue=True,
             show_progress="full",
@@ -217,8 +401,6 @@ def build_ui() -> gr.Blocks:
 
 
 def main() -> None:
-    import os
-
     # Privacy: never phone home — this is a local-first tool.
     os.environ.setdefault("GRADIO_ANALYTICS_ENABLED", "False")
     os.environ.setdefault("HF_HUB_DISABLE_TELEMETRY", "1")
