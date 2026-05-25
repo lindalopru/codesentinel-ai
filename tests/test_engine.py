@@ -17,9 +17,14 @@ class _FakeClient:
         self.model = "fake"
         self.calls: list[dict] = []
 
-    def review(self, *, code, language, filename, augmentation=None):
+    def review(self, *, code, language, filename, augmentation=None, output_language="en"):
         self.calls.append(
-            {"language": language, "filename": filename, "augmentation": augmentation}
+            {
+                "language": language,
+                "filename": filename,
+                "augmentation": augmentation,
+                "output_language": output_language,
+            }
         )
         return LLMResponse(payload=self.payload, raw="{}", model=self.model, duration_s=0.1)
 

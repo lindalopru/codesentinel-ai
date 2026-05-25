@@ -100,6 +100,7 @@ class ReviewEngine:
         *,
         diff_lines: set[int] | None = None,
         use_static: bool = True,
+        output_language: str = "en",
     ) -> ReviewResult:
         p = Path(path)
         source = read_text_safe(p)
@@ -110,6 +111,7 @@ class ReviewEngine:
             file_path=str(p),
             diff_lines=diff_lines,
             use_static=use_static,
+            output_language=output_language,
         )
 
     def review_source(
@@ -120,6 +122,7 @@ class ReviewEngine:
         file_path: str = "snippet",
         diff_lines: set[int] | None = None,
         use_static: bool = False,
+        output_language: str = "en",
     ) -> ReviewResult:
         return self._review_source(
             source=source,
@@ -127,6 +130,7 @@ class ReviewEngine:
             file_path=file_path,
             diff_lines=diff_lines,
             use_static=use_static,
+            output_language=output_language,
         )
 
     def _review_source(
@@ -137,6 +141,7 @@ class ReviewEngine:
         file_path: str,
         diff_lines: set[int] | None,
         use_static: bool,
+        output_language: str = "en",
     ) -> ReviewResult:
         start = time.perf_counter()
 
@@ -156,6 +161,7 @@ class ReviewEngine:
                     language=language,
                     filename=path.name or "snippet",
                     augmentation=_augmentation_hints(static_findings) if use_static else None,
+                    output_language=output_language,
                 )
             except (LLMError, ParseError) as exc:
                 log.warning("LLM failed on %s lines %d-%d: %s", path.name, chunk.start_line, chunk.end_line, exc)
@@ -192,12 +198,13 @@ class ReviewEngine:
         include: Iterable[str] | None = None,
         exclude: Iterable[str] | None = None,
         use_static: bool = True,
+        output_language: str = "en",
     ) -> list[ReviewResult]:
         from fnmatch import fnmatch
 
         p = Path(path)
         if not p.is_dir():
-            return [self.review_file(p, use_static=use_static)]
+            return [self.review_file(p, use_static=use_static, output_language=output_language)]
 
         include = list(include or ["*.py", "*.js", "*.jsx", "*.ts", "*.tsx", "*.java", "*.go", "*.rs"])
         exclude = list(exclude or [".venv", "node_modules", "dist", "build", "__pycache__", ".git"])
@@ -212,15 +219,23 @@ class ReviewEngine:
                 continue
             files.append(f)
 
-        return asyncio.run(self._review_files_async(files, use_static=use_static))
+        return asyncio.run(
+            self._review_files_async(files, use_static=use_static, output_language=output_language)
+        )
 
-    async def _review_files_async(self, files: list[Path], *, use_static: bool) -> list[ReviewResult]:
+    async def _review_files_async(
+        self, files: list[Path], *, use_static: bool, output_language: str = "en"
+    ) -> list[ReviewResult]:
         sem = asyncio.Semaphore(self.settings.concurrency)
 
         async def one(f: Path) -> ReviewResult:
             async with sem:
                 return await asyncio.to_thread(
-                    self.review_file, f, diff_lines=None, use_static=use_static
+                    self.review_file,
+                    f,
+                    diff_lines=None,
+                    use_static=use_static,
+                    output_language=output_language,
                 )
 
         return await asyncio.gather(*(one(f) for f in files))
@@ -234,6 +249,7 @@ class ReviewEngine:
         ref: str = "HEAD",
         staged: bool = False,
         use_static: bool = True,
+        output_language: str = "en",
     ) -> list[ReviewResult]:
         repo_path = Path(repo)
         diff_map = changed_lines(repo_path, ref=ref, staged=staged)
@@ -244,7 +260,14 @@ class ReviewEngine:
                 continue
             if detect_language(abs_path) == "unknown":
                 continue
-            results.append(self.review_file(abs_path, diff_lines=lines, use_static=use_static))
+            results.append(
+                self.review_file(
+                    abs_path,
+                    diff_lines=lines,
+                    use_static=use_static,
+                    output_language=output_language,
+                )
+            )
         return results
 
 

@@ -13,7 +13,7 @@ class _FakeClient:
         self.payload = payload
         self.model = "fake"
 
-    def review(self, *, code, language, filename, augmentation=None):
+    def review(self, *, code, language, filename, augmentation=None, output_language="en"):
         return LLMResponse(payload=self.payload, raw="{}", model=self.model, duration_s=0.05)
 
     def list_models(self):

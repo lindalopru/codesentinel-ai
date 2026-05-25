@@ -51,9 +51,14 @@ class OllamaClient:
         language: str,
         filename: str = "snippet",
         augmentation: list[str] | None = None,
+        output_language: str = "en",
     ) -> LLMResponse:
         messages = build_messages(
-            code=code, language=language, filename=filename, augmentation=augmentation
+            code=code,
+            language=language,
+            filename=filename,
+            augmentation=augmentation,
+            output_language=output_language,
         )
         return self._chat_with_retry(messages)
 
@@ -110,9 +115,14 @@ class OllamaClient:
         language: str,
         filename: str = "snippet",
         augmentation: list[str] | None = None,
+        output_language: str = "en",
     ) -> LLMResponse:
         messages = build_messages(
-            code=code, language=language, filename=filename, augmentation=augmentation
+            code=code,
+            language=language,
+            filename=filename,
+            augmentation=augmentation,
+            output_language=output_language,
         )
         try:
             return await self._achat(messages, temperature=self.settings.ollama_temperature)

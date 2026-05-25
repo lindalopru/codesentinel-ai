@@ -320,8 +320,14 @@ def _status_done(text: str) -> str:
     return f"<div class='cs-status-line cs-status-done'>{text}</div>"
 
 
+def _norm_lang(v: str) -> str:
+    """Normalise the hidden output-language textbox value to 'en' or 'es'."""
+    s = (v or "es").strip().lower()
+    return "en" if s.startswith("en") else "es"
+
+
 def review_uploaded_file(
-    file_obj, model: str, language: str, min_sev: str, use_static: bool
+    file_obj, model: str, language: str, min_sev: str, use_static: bool, out_lang: str,
 ):
     if file_obj is None:
         yield ("<div class='cs-status'>⬆️ Sube un archivo para empezar.</div>",
@@ -332,7 +338,7 @@ def review_uploaded_file(
 
     path = Path(file_obj.name)
     engine = _resolve_engine(model)
-    result = engine.review_file(path, use_static=use_static)
+    result = engine.review_file(path, use_static=use_static, output_language=_norm_lang(out_lang))
     if language and language != "auto":
         result.language = language
     result = result.filter_by_severity(Severity(min_sev))
@@ -347,7 +353,7 @@ def review_uploaded_file(
 
 
 def review_pasted_code(
-    code: str, model: str, language: str, min_sev: str, use_static: bool
+    code: str, model: str, language: str, min_sev: str, use_static: bool, out_lang: str,
 ):
     if not code or not code.strip():
         yield ("<div class='cs-status'>📝 Pega código o usa un ejemplo de arriba.</div>",
@@ -356,15 +362,18 @@ def review_pasted_code(
     yield (LOADING_STATE, _empty_stats(), None, _loading_status())
 
     lang = language if language and language != "auto" else "python"
+    out = _norm_lang(out_lang)
     engine = _resolve_engine(model)
     if use_static:
         ext = next((e for e, name in EXTENSION_MAP.items() if name == lang), ".txt")
         tmp = Path(tempfile.mkdtemp()) / f"pasted{ext}"
         tmp.write_text(code, encoding="utf-8")
-        result = engine.review_file(tmp, use_static=True)
+        result = engine.review_file(tmp, use_static=True, output_language=out)
         result.file_path = "pasted snippet"
     else:
-        result = engine.review_source(code, language=lang, file_path="pasted snippet", use_static=False)
+        result = engine.review_source(
+            code, language=lang, file_path="pasted snippet", use_static=False, output_language=out,
+        )
     result = result.filter_by_severity(Severity(min_sev))
     md_path = _save_md_report(result)
     n = len(result.findings)
@@ -376,7 +385,9 @@ def review_pasted_code(
     )
 
 
-def review_git_diff_handler(repo_path: str, ref: str, staged: bool, model: str, min_sev: str, use_static: bool):
+def review_git_diff_handler(
+    repo_path: str, ref: str, staged: bool, model: str, min_sev: str, use_static: bool, out_lang: str,
+):
     if not repo_path or not Path(repo_path).exists():
         yield ("<div class='cs-status'>📁 Provee la ruta a un repositorio git válido.</div>",
                _empty_stats(), None, _status_done("Listo."))
@@ -384,7 +395,10 @@ def review_git_diff_handler(repo_path: str, ref: str, staged: bool, model: str, 
     yield (LOADING_STATE, _empty_stats(), None, _loading_status())
 
     engine = _resolve_engine(model)
-    results = engine.review_diff(Path(repo_path), ref=ref or "HEAD", staged=staged, use_static=use_static)
+    results = engine.review_diff(
+        Path(repo_path), ref=ref or "HEAD", staged=staged, use_static=use_static,
+        output_language=_norm_lang(out_lang),
+    )
     if not results:
         yield ("<div class='cs-status'>✨ No hay cambios revisables en el diff.</div>",
                _empty_stats(), None, _status_done("Sin cambios."))
@@ -666,11 +680,29 @@ def build_ui() -> gr.Blocks:
     }
   };
 
+  /* Push the active language into the hidden Gradio textbox so review
+   * handlers know what language to ask the LLM for. */
+  const syncOutputLang = () => {
+    const root = document.getElementById('cs-output-lang');
+    if (!root) return;
+    const input = root.querySelector('textarea, input');
+    if (!input) return;
+    if (input.value !== lang) {
+      const setter = Object.getOwnPropertyDescriptor(
+        input.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype,
+        'value'
+      ).set;
+      setter.call(input, lang);
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  };
+
   const applyAll = () => {
     document.documentElement.setAttribute('data-lang', lang);
     applyI18nElements();
     applyGradioLabels();
     applyStatus();
+    syncOutputLang();
   };
 
   applyAll();
@@ -823,6 +855,15 @@ def build_ui() -> gr.Blocks:
                 label="Analizadores estáticos",
             )
 
+        # Hidden output-language state — synced from the JS ES/EN toggle.
+        # Lives outside the accordion so it's always submitted with the form.
+        out_lang_tb = gr.Textbox(
+            value="es",
+            visible=False,
+            elem_id="cs-output-lang",
+            interactive=True,
+        )
+
         # ---------- Footer ----------
         gr.HTML(FOOTER_HTML)
 
@@ -838,21 +879,21 @@ def build_ui() -> gr.Blocks:
         # via the generator yield in each handler.
         paste_btn.click(
             review_pasted_code,
-            inputs=[code_in, model_dd, lang_dd, min_sev_dd, static_cb],
+            inputs=[code_in, model_dd, lang_dd, min_sev_dd, static_cb, out_lang_tb],
             outputs=[findings_out, counts_out, report_dl, status],
             queue=True,
             show_progress="hidden",
         )
         file_btn.click(
             review_uploaded_file,
-            inputs=[file_in, model_dd, lang_dd, min_sev_dd, static_cb],
+            inputs=[file_in, model_dd, lang_dd, min_sev_dd, static_cb, out_lang_tb],
             outputs=[findings_out, counts_out, report_dl, status],
             queue=True,
             show_progress="hidden",
         )
         diff_btn.click(
             review_git_diff_handler,
-            inputs=[repo_in, ref_in, staged_cb, model_dd, min_sev_dd, static_cb],
+            inputs=[repo_in, ref_in, staged_cb, model_dd, min_sev_dd, static_cb, out_lang_tb],
             outputs=[findings_out, counts_out, report_dl, status],
             queue=True,
             show_progress="hidden",
