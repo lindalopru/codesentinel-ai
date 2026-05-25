@@ -1,0 +1,24 @@
+sequenceDiagram
+    participant U as User
+    participant CLI as CLI / WebUI
+    participant E as ReviewEngine
+    participant SA as Static Analyzers
+    participant LLM as OllamaClient
+    participant O as Ollama daemon
+    participant M as Merger
+
+    U->>CLI: review path/to/file.py
+    CLI->>E: review_file(path, use_static=true)
+    E->>E: chunk_code (if file > 1500 lines)
+    E->>SA: run(path) — bandit + ruff
+    SA-->>E: List[Finding] (hints)
+    E->>LLM: review(code, language, augmentation=hints)
+    LLM->>O: POST /api/chat (format=json, num_ctx=16384)
+    O->>O: Qwen2.5-Coder inference (Metal)
+    O-->>LLM: JSON response
+    LLM->>LLM: parser.extract_json (fallback chain)
+    LLM-->>E: payload dict
+    E->>M: merge_findings(llm, static)
+    M-->>E: deduped, severity-sorted findings
+    E-->>CLI: ReviewResult
+    CLI->>U: Rich panels / Gradio cards

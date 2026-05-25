@@ -1,0 +1,55 @@
+flowchart LR
+    subgraph "Front ends"
+        CLI["Typer CLI<br/>cli/main.py"]
+        WEB["Gradio Blocks UI<br/>web/app.py"]
+    end
+
+    subgraph "Review engine — codesentinel"
+        ENG["ReviewEngine"]
+        CHK["Chunker"]
+        MER["Merger"]
+        GIT["git_diff parser"]
+    end
+
+    subgraph "LLM layer"
+        PRM["prompts.py"]
+        CLT["OllamaClient"]
+        PAR["parser.py"]
+    end
+
+    subgraph "Static analyzers"
+        BND["bandit"]
+        RFF["ruff"]
+        ESL["eslint"]
+    end
+
+    subgraph "Local infra"
+        OLL[(Ollama daemon)]
+        MDL[(Qwen2.5-Coder 7B)]
+    end
+
+    subgraph "Output"
+        RPT["Reporting"]
+        RCH["Rich panels"]
+        HTM["HTML cards"]
+    end
+
+    CLI --> ENG
+    WEB --> ENG
+    ENG --> CHK
+    ENG --> GIT
+    ENG --> CLT
+    CLT --> PRM
+    CLT --> OLL
+    OLL --> MDL
+    CLT --> PAR
+    ENG --> BND
+    ENG --> RFF
+    ENG --> ESL
+    BND --> MER
+    RFF --> MER
+    ESL --> MER
+    PAR --> MER
+    MER --> RPT
+    RPT --> RCH
+    RPT --> HTM

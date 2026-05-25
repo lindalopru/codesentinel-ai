@@ -1,0 +1,1 @@
+"""CodeSentinel terminal entry point."""

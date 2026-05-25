@@ -1,0 +1,62 @@
+/* CodeSentinel AI — custom Gradio styling */
+
+.finding-card {
+  border-left: 4px solid #888;
+  padding: 12px 14px;
+  margin: 8px 0;
+  background: var(--block-background-fill);
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+
+.finding-card.sev-critical { border-color: #b91c1c; background: rgba(185, 28, 28, 0.06); }
+.finding-card.sev-high     { border-color: #dc2626; background: rgba(220, 38, 38, 0.05); }
+.finding-card.sev-medium   { border-color: #d97706; background: rgba(217, 119, 6, 0.05); }
+.finding-card.sev-low      { border-color: #2563eb; background: rgba(37, 99, 235, 0.04); }
+.finding-card.sev-info     { border-color: #6b7280; }
+
+.severity-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+.severity-badge.critical { background: #b91c1c; color: #fff; }
+.severity-badge.high     { background: #dc2626; color: #fff; }
+.severity-badge.medium   { background: #d97706; color: #fff; }
+.severity-badge.low      { background: #2563eb; color: #fff; }
+.severity-badge.info     { background: #6b7280; color: #fff; }
+
+.finding-card h4 { margin: 0 0 6px 0; font-size: 15px; }
+.finding-card .meta { color: var(--body-text-color-subdued); font-size: 12px; margin-bottom: 8px; }
+.finding-card pre {
+  background: #1e1e1e;
+  color: #e6e6e6;
+  padding: 10px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-size: 12px;
+  margin: 8px 0 0 0;
+}
+.finding-card .suggestion {
+  border-left: 3px solid #10b981;
+  background: rgba(16, 185, 129, 0.06);
+  padding: 8px 10px;
+  margin-top: 8px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.summary-banner {
+  padding: 14px 18px;
+  border-radius: 10px;
+  margin-bottom: 14px;
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.10), rgba(99, 102, 241, 0.03));
+  border: 1px solid rgba(99, 102, 241, 0.25);
+}

@@ -1,0 +1,26 @@
+services:
+  # Ollama runs better on the host (Metal acceleration) on macOS,
+  # but this stanza is here for Linux dev boxes.
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.web
+    depends_on:
+      - ollama
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+      OLLAMA_MODEL: qwen2.5-coder:7b-instruct-q4_K_M
+    ports:
+      - "7860:7860"
+    restart: unless-stopped
+
+volumes:
+  ollama-data:
