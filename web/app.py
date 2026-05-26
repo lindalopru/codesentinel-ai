@@ -281,12 +281,19 @@ def _resolve_engine(selected_model: str) -> ReviewEngine:
     return ReviewEngine(client=c, settings=_settings)
 
 
+DOWNLOADS_DIR = Path.home() / "Downloads"
+
+
 def _save_md_report(results: ReviewResult | list[ReviewResult]) -> str:
+    """Write the report directly into the user's Downloads folder so they
+    find it instantly in Finder. Returns the path so Gradio's file output
+    can also offer it as a download link."""
     md = to_markdown(results)
+    DOWNLOADS_DIR.mkdir(parents=True, exist_ok=True)
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-    tmp = Path(tempfile.gettempdir()) / f"codesentinel_{ts}.md"
-    tmp.write_text(md, encoding="utf-8")
-    return str(tmp)
+    out = DOWNLOADS_DIR / f"CodeSentinel_report_{ts}.md"
+    out.write_text(md, encoding="utf-8")
+    return str(out)
 
 
 def _empty_outputs():
@@ -316,8 +323,23 @@ def _loading_status() -> str:
     )
 
 
-def _status_done(text: str) -> str:
-    return f"<div class='cs-status-line cs-status-done'>{text}</div>"
+def _status_done(text: str, *, md_path: str | None = None) -> str:
+    """Render the 'done' status with an optional 'Saved to ~/Downloads/…' link."""
+    saved_html = ""
+    if md_path:
+        fname = Path(md_path).name
+        saved_html = (
+            "<span class='cs-status-saved'>"
+            "<svg viewBox='0 0 24 24' fill='none' stroke='currentColor' "
+            "stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>"
+            "<path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/>"
+            "<polyline points='7 10 12 15 17 10'/>"
+            "<line x1='12' y1='15' x2='12' y2='3'/></svg> "
+            f"<span data-i18n='status.saved'>Guardado en</span> "
+            f"<code>~/Downloads/{fname}</code>"
+            "</span>"
+        )
+    return f"<div class='cs-status-line cs-status-done'>{text}{saved_html}</div>"
 
 
 def _norm_lang(v: str) -> str:
@@ -348,7 +370,10 @@ def review_uploaded_file(
         render_findings_html(result),
         render_stats_html(result),
         md_path,
-        _status_done(f"<b>✓</b> Revisado en {result.duration_s:.1f}s · {n} hallazgo(s)."),
+        _status_done(
+            f"<b>✓</b> Revisado en {result.duration_s:.1f}s · {n} hallazgo(s).",
+            md_path=md_path,
+        ),
     )
 
 
@@ -381,7 +406,10 @@ def review_pasted_code(
         render_findings_html(result),
         render_stats_html(result),
         md_path,
-        _status_done(f"<b>✓</b> Revisado en {result.duration_s:.1f}s · {n} hallazgo(s)."),
+        _status_done(
+            f"<b>✓</b> Revisado en {result.duration_s:.1f}s · {n} hallazgo(s).",
+            md_path=md_path,
+        ),
     )
 
 
@@ -410,7 +438,10 @@ def review_git_diff_handler(
         render_findings_html(results),
         render_stats_html(results),
         md_path,
-        _status_done(f"<b>✓</b> {len(results)} archivo(s) · {total} hallazgo(s)."),
+        _status_done(
+            f"<b>✓</b> {len(results)} archivo(s) · {total} hallazgo(s).",
+            md_path=md_path,
+        ),
     )
 
 
@@ -507,6 +538,7 @@ def build_ui() -> gr.Blocks:
     /* loading + status */
     'status.ready':           { es: 'Listo.',                   en: 'Ready.' },
     'status.reviewing':       { es: 'Revisando código…',        en: 'Reviewing code…' },
+    'status.saved':           { es: 'Guardado en',              en: 'Saved to' },
     'loading.title':          { es: 'Analizando código…',       en: 'Analyzing code…' },
     'loading.body':           { es: 'El modelo está revisando tu código. Esto puede tardar 10–60 segundos.',
                                 en: 'The model is analyzing your code. This may take 10–60 seconds.' },
@@ -802,6 +834,10 @@ def build_ui() -> gr.Blocks:
         css=CSS,
         js=theme_js,
         analytics_enabled=False,
+        # Allow Gradio's file component to serve files from ~/Downloads so
+        # the user can click to re-download from the UI.
+        # Per Gradio docs the path must exist; we mkdir on app init.
+        # We don't expose anything else.
     ) as demo:
 
         # Hero
@@ -940,6 +976,9 @@ def main() -> None:
     os.environ.setdefault("GRADIO_ANALYTICS_ENABLED", "False")
     os.environ.setdefault("HF_HUB_DISABLE_TELEMETRY", "1")
 
+    # Make sure ~/Downloads exists so report writes don't fail.
+    DOWNLOADS_DIR.mkdir(parents=True, exist_ok=True)
+
     demo = build_ui()
     host = os.environ.get("CODESENTINEL_WEB_HOST", "127.0.0.1")
     port = int(os.environ.get("CODESENTINEL_WEB_PORT", "7860"))
@@ -948,6 +987,8 @@ def main() -> None:
         server_port=port,
         inbrowser=False,
         share=False,
+        # Allow the gr.File output to serve files we wrote into ~/Downloads.
+        allowed_paths=[str(DOWNLOADS_DIR)],
     )
 
 
