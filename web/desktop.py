@@ -65,6 +65,11 @@ def _start_server_in_background() -> None:
     os.environ.setdefault("GRADIO_ANALYTICS_ENABLED", "False")
     os.environ.setdefault("HF_HUB_DISABLE_TELEMETRY", "1")
 
+    # Make sure ~/Downloads exists and Gradio is allowed to serve from it.
+    from pathlib import Path as _P
+    downloads = _P.home() / "Downloads"
+    downloads.mkdir(parents=True, exist_ok=True)
+
     demo = build_ui()
     demo.queue(default_concurrency_limit=1).launch(
         server_name=HOST,
@@ -74,6 +79,7 @@ def _start_server_in_background() -> None:
         prevent_thread_lock=True,
         quiet=True,
         show_api=False,
+        allowed_paths=[str(downloads)],
     )
 
 
