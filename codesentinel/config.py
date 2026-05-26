@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     ollama_host: str = Field(default="http://127.0.0.1:11434")
     ollama_model: str = Field(default="qwen2.5-coder:7b-instruct-q4_K_M")
     ollama_num_ctx: int = Field(default=16384, ge=512)
-    ollama_temperature: float = Field(default=0.2, ge=0.0, le=2.0)
+    ollama_temperature: float = Field(default=0.3, ge=0.0, le=2.0)
     ollama_top_p: float = Field(default=0.9, ge=0.0, le=1.0)
     ollama_timeout: int = Field(default=180, ge=10)
 

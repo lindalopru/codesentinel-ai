@@ -11,7 +11,7 @@ import gradio as gr
 
 from codesentinel import __version__
 from codesentinel.config import get_settings
-from codesentinel.languages import EXTENSION_MAP
+from codesentinel.languages import EXTENSION_MAP, detect_language
 from codesentinel.llm.client import OllamaClient
 from codesentinel.reporting import to_markdown
 from codesentinel.review import ReviewEngine
@@ -348,6 +348,25 @@ def _norm_lang(v: str) -> str:
     return "en" if s.startswith("en") else "es"
 
 
+def _resolve_uploaded_path(file_obj) -> Path:
+    """Gradio 5's gr.File can return different shapes (NamedString, str,
+    dict with `.path`, FileData). Normalise to a real Path."""
+    if file_obj is None:
+        raise ValueError("file_obj is None")
+    if isinstance(file_obj, str):
+        return Path(file_obj)
+    # Most common: NamedString or _TemporaryFileWrapper with .name
+    name = getattr(file_obj, "name", None)
+    if isinstance(name, str) and name:
+        return Path(name)
+    # FileData dict { 'path': ..., 'orig_name': ..., 'meta': {...} }
+    if isinstance(file_obj, dict):
+        for k in ("path", "name", "orig_name"):
+            if file_obj.get(k):
+                return Path(file_obj[k])
+    raise ValueError(f"Unrecognised file_obj type: {type(file_obj).__name__}")
+
+
 def review_uploaded_file(
     file_obj, model: str, language: str, min_sev: str, use_static: bool, out_lang: str,
 ):
@@ -355,20 +374,42 @@ def review_uploaded_file(
         yield ("<div class='cs-status'>⬆️ Sube un archivo para empezar.</div>",
                _empty_stats(), None, _status_done("Listo."))
         return
+
+    # Resolve the file path robustly. Surface any error clearly.
+    try:
+        path = _resolve_uploaded_path(file_obj)
+    except Exception as exc:
+        yield (f"<div class='cs-status'>❌ No pude leer el archivo: {exc}</div>",
+               _empty_stats(), None, _status_done("Error."))
+        return
+
+    if not path.exists() or path.stat().st_size == 0:
+        yield (f"<div class='cs-status'>❌ El archivo está vacío o no existe ({path}).</div>",
+               _empty_stats(), None, _status_done("Error."))
+        return
+
     # Loading state — yields immediately so the UI shows a spinner.
     yield (LOADING_STATE, _empty_stats(), None, _loading_status())
 
-    path = Path(file_obj.name)
     engine = _resolve_engine(model)
-    result = engine.review_file(path, use_static=use_static, output_language=_norm_lang(out_lang))
+    detected = detect_language(path)
 
-    # Show just the filename, not Gradio's ugly tempfile path
-    # (`/private/var/folders/.../gradio/<hash>/foo.py` -> `foo.py`).
+    # Static analyzers only apply to languages they understand.
+    can_static = use_static and detected in {"python", "javascript", "typescript"}
+
+    try:
+        result = engine.review_file(
+            path, use_static=can_static, output_language=_norm_lang(out_lang),
+        )
+    except Exception as exc:
+        yield (f"<div class='cs-status'>❌ Error durante el análisis: {exc}</div>",
+               _empty_stats(), None, _status_done("Error."))
+        return
+
+    # Show just the filename, not Gradio's ugly tempfile path.
     result.file_path = path.name
 
-    # For uploaded files, the extension is the source of truth. The "Lenguaje
-    # del código" dropdown only overrides when detection failed (unknown
-    # extension) AND the user picked a specific language.
+    # If detection failed AND the user picked a specific language, honour it.
     if result.language == "unknown" and language and language != "auto":
         result.language = language
 
@@ -386,6 +427,29 @@ def review_uploaded_file(
     )
 
 
+_PASTE_LANG_HINTS: dict[str, tuple[str, ...]] = {
+    "python":     ("def ", "import ", "print(", "from ", "self.", "#"),
+    "javascript": ("function ", "const ", "let ", "var ", "=>", "require(", "//"),
+    "typescript": ("interface ", ": string", ": number", ": any", "type ", "as const"),
+    "java":       ("public class", "public static", "import java", "@Override", "System.out"),
+    "go":         ("package ", "func ", "import (", "fmt.", ":= ", "go func"),
+    "rust":       ("fn ", "let mut ", "pub fn", "use std::", "impl ", "->"),
+    "ruby":       ("def ", "end", "require '", "puts ", "@"),
+    "php":        ("<?php", "function ", "$this->", "echo "),
+}
+
+
+def _sniff_language(code: str) -> str:
+    """Detect language from pasted code by counting tell-tale tokens."""
+    head = code[:2000]
+    best, best_hits = "python", 0
+    for lang, hints in _PASTE_LANG_HINTS.items():
+        hits = sum(1 for h in hints if h in head)
+        if hits > best_hits:
+            best, best_hits = lang, hits
+    return best if best_hits >= 2 else "python"
+
+
 def review_pasted_code(
     code: str, model: str, language: str, min_sev: str, use_static: bool, out_lang: str,
 ):
@@ -395,19 +459,38 @@ def review_pasted_code(
         return
     yield (LOADING_STATE, _empty_stats(), None, _loading_status())
 
-    lang = language if language and language != "auto" else "python"
+    # Resolve language: explicit user choice wins; otherwise sniff from code.
+    lang = language if language and language != "auto" else _sniff_language(code)
+
     out = _norm_lang(out_lang)
     engine = _resolve_engine(model)
-    if use_static:
+
+    # Static analyzers only understand python (bandit, ruff) and js/ts (eslint).
+    # Running ruff on Go produces 46 fake "invalid-syntax" errors — disable.
+    can_static = use_static and lang in {"python", "javascript", "typescript"}
+
+    if can_static:
         ext = next((e for e, name in EXTENSION_MAP.items() if name == lang), ".txt")
         tmp = Path(tempfile.mkdtemp()) / f"pasted{ext}"
         tmp.write_text(code, encoding="utf-8")
-        result = engine.review_file(tmp, use_static=True, output_language=out)
+        try:
+            result = engine.review_file(tmp, use_static=True, output_language=out)
+        except Exception as exc:
+            yield (f"<div class='cs-status'>❌ Error durante el análisis: {exc}</div>",
+                   _empty_stats(), None, _status_done("Error."))
+            return
         result.file_path = "pasted snippet"
     else:
-        result = engine.review_source(
-            code, language=lang, file_path="pasted snippet", use_static=False, output_language=out,
-        )
+        try:
+            result = engine.review_source(
+                code, language=lang, file_path="pasted snippet",
+                use_static=False, output_language=out,
+            )
+        except Exception as exc:
+            yield (f"<div class='cs-status'>❌ Error durante el análisis: {exc}</div>",
+                   _empty_stats(), None, _status_done("Error."))
+            return
+
     result = result.filter_by_severity(Severity(min_sev))
     md_path = _save_md_report(result)
     n = len(result.findings)
