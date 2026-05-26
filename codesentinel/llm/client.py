@@ -74,16 +74,21 @@ class OllamaClient:
 
     def _chat(self, messages: list[dict[str, str]], *, temperature: float) -> LLMResponse:
         url = f"{self.settings.ollama_host}/api/chat"
+        options = {
+            "num_ctx": self.settings.ollama_num_ctx,
+            "temperature": temperature,
+            "top_p": self.settings.ollama_top_p,
+        }
+        # A non-zero seed makes Ollama reproducible: same input → same output.
+        # Without this, llama.cpp picks a random seed each call.
+        if self.settings.ollama_seed:
+            options["seed"] = self.settings.ollama_seed
         payload = {
             "model": self.model,
             "messages": messages,
             "stream": False,
             "format": "json",
-            "options": {
-                "num_ctx": self.settings.ollama_num_ctx,
-                "temperature": temperature,
-                "top_p": self.settings.ollama_top_p,
-            },
+            "options": options,
         }
         try:
             with httpx.Client(timeout=self._timeout) as client:
@@ -135,16 +140,19 @@ class OllamaClient:
 
     async def _achat(self, messages: list[dict[str, str]], *, temperature: float) -> LLMResponse:
         url = f"{self.settings.ollama_host}/api/chat"
+        options = {
+            "num_ctx": self.settings.ollama_num_ctx,
+            "temperature": temperature,
+            "top_p": self.settings.ollama_top_p,
+        }
+        if self.settings.ollama_seed:
+            options["seed"] = self.settings.ollama_seed
         payload = {
             "model": self.model,
             "messages": messages,
             "stream": False,
             "format": "json",
-            "options": {
-                "num_ctx": self.settings.ollama_num_ctx,
-                "temperature": temperature,
-                "top_p": self.settings.ollama_top_p,
-            },
+            "options": options,
         }
         try:
             async with httpx.AsyncClient(timeout=self._timeout) as client:

@@ -12,9 +12,15 @@ class Settings(BaseSettings):
     ollama_host: str = Field(default="http://127.0.0.1:11434")
     ollama_model: str = Field(default="qwen2.5-coder:7b-instruct-q4_K_M")
     ollama_num_ctx: int = Field(default=16384, ge=512)
-    ollama_temperature: float = Field(default=0.3, ge=0.0, le=2.0)
+    ollama_temperature: float = Field(default=0.2, ge=0.0, le=2.0)
     ollama_top_p: float = Field(default=0.9, ge=0.0, le=1.0)
     ollama_timeout: int = Field(default=180, ge=10)
+
+    # Random seed used by Ollama / llama.cpp for token sampling.
+    # Without a fixed seed every call samples a different random stream,
+    # so the same input produces a different number of findings each time.
+    # Set to 0 if you actually want randomness back.
+    ollama_seed: int = Field(default=42)
 
     max_file_lines: int = Field(default=1500, ge=100)
     concurrency: int = Field(default=2, ge=1, le=8)
