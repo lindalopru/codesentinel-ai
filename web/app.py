@@ -680,20 +680,38 @@ def build_ui() -> gr.Blocks:
     }
   };
 
-  /* Push the active language into the hidden Gradio textbox so review
-   * handlers know what language to ask the LLM for. */
+  /* Push the active language into the Gradio dropdown for output-language
+   * so review handlers know what language to ask the LLM for. The dropdown
+   * lives in advanced options (visible) so the user can also override it
+   * manually. Retries until the element exists since Gradio renders async. */
+  let _syncAttempts = 0;
   const syncOutputLang = () => {
     const root = document.getElementById('cs-output-lang');
-    if (!root) return;
-    const input = root.querySelector('textarea, input');
-    if (!input) return;
+    if (!root) {
+      if (_syncAttempts++ < 40) setTimeout(syncOutputLang, 100);
+      return;
+    }
+    /* Gradio Dropdown has a child input that holds the current value */
+    const input = root.querySelector('input, textarea, select');
+    if (!input) {
+      if (_syncAttempts++ < 40) setTimeout(syncOutputLang, 100);
+      return;
+    }
     if (input.value !== lang) {
-      const setter = Object.getOwnPropertyDescriptor(
-        input.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype,
-        'value'
-      ).set;
+      const proto = input.tagName === 'TEXTAREA'
+        ? HTMLTextAreaElement.prototype
+        : (input.tagName === 'SELECT' ? HTMLSelectElement.prototype : HTMLInputElement.prototype);
+      const setter = Object.getOwnPropertyDescriptor(proto, 'value').set;
       setter.call(input, lang);
       input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+      /* For dropdowns, also click any matching option in the open list */
+      const opts = root.querySelectorAll('[role="option"], .item');
+      opts.forEach(o => {
+        if ((o.textContent || '').trim() === lang) {
+          o.setAttribute('aria-selected', 'true');
+        }
+      });
     }
   };
 
@@ -730,6 +748,22 @@ def build_ui() -> gr.Blocks:
       langBtn.addEventListener('click', () => {
         lang = (lang === 'es') ? 'en' : 'es';
         try { localStorage.setItem(L_KEY, lang); } catch (e) {}
+        /* Stale findings were generated in the OLD language. Reset the
+         * results panel so the user re-runs in the new language. */
+        const findingsEl = document.getElementById('cs-findings-out');
+        const countsEl = document.getElementById('cs-counts-out');
+        const statusEl = document.getElementById('cs-status-md');
+        const emptyHTML = (lang === 'es')
+          ? `<div class='cs-empty'><div class='ico'><svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='8'/><path d='m21 21-4.3-4.3'/></svg></div><h3>Sin análisis aún</h3><p>Pega código, sube un archivo o prueba un ejemplo para empezar.</p></div>`
+          : `<div class='cs-empty'><div class='ico'><svg viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='8'/><path d='m21 21-4.3-4.3'/></svg></div><h3>No analysis yet</h3><p>Paste code, upload a file, or try a sample to get started.</p></div>`;
+        const zeroStats = `<div class='cs-stats-grid'>` +
+          ['critical','high','medium','low','info'].map(s =>
+            `<div class='cs-stat-card ${s} zero'><div class='v'>0</div><div class='l'>${s}</div></div>`).join('') +
+          `</div>`;
+        const readyTxt = (lang === 'es') ? 'Listo.' : 'Ready.';
+        if (findingsEl) findingsEl.innerHTML = emptyHTML;
+        if (countsEl)   countsEl.innerHTML   = zeroStats;
+        if (statusEl)   statusEl.innerHTML   = `<div class='cs-status-line'>${readyTxt}</div>`;
         applyAll();
       });
     } else if (!langBtn) { bound = false; }
@@ -824,11 +858,12 @@ def build_ui() -> gr.Blocks:
         # ---------- Results section ----------
         with gr.Row(equal_height=False):
             with gr.Column(scale=2):
-                findings_out = gr.HTML(value=EMPTY_STATE)
+                findings_out = gr.HTML(value=EMPTY_STATE, elem_id="cs-findings-out")
 
             with gr.Column(scale=1):
                 counts_out = gr.HTML(
-                    value=render_stats_html(ReviewResult(file_path="", language="auto"))
+                    value=render_stats_html(ReviewResult(file_path="", language="auto")),
+                    elem_id="cs-counts-out",
                 )
                 min_sev_dd = gr.Dropdown(
                     choices=SEVERITY_CHOICES,
@@ -848,21 +883,19 @@ def build_ui() -> gr.Blocks:
             lang_dd = gr.Dropdown(
                 choices=LANGUAGE_CHOICES,
                 value="auto",
-                label="Lenguaje",
+                label="Lenguaje del código",
+            )
+            out_lang_tb = gr.Dropdown(
+                choices=["es", "en"],
+                value="es",
+                label="Idioma de resultados",
+                elem_id="cs-output-lang",
+                interactive=True,
             )
             static_cb = gr.Checkbox(
                 value=True,
                 label="Analizadores estáticos",
             )
-
-        # Hidden output-language state — synced from the JS ES/EN toggle.
-        # Lives outside the accordion so it's always submitted with the form.
-        out_lang_tb = gr.Textbox(
-            value="es",
-            visible=False,
-            elem_id="cs-output-lang",
-            interactive=True,
-        )
 
         # ---------- Footer ----------
         gr.HTML(FOOTER_HTML)
