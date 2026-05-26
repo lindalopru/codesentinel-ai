@@ -1808,6 +1808,147 @@ html[data-theme="dark"] .cs-status-saved code {
 }
 
 /* =========================================================
+ *  TOAST / SNACKBAR (download confirmation)
+ * ========================================================= */
+.cs-toast-container {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+.cs-toast {
+  background: var(--cs-card);
+  border: 1px solid var(--cs-border);
+  border-left: 3px solid var(--cs-success);
+  border-radius: var(--cs-radius);
+  padding: 14px 16px 14px 14px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: var(--cs-shadow-md);
+  min-width: 320px;
+  max-width: 440px;
+  pointer-events: auto;
+  animation: cs-toast-in 0.32s cubic-bezier(0.2, 0.9, 0.3, 1);
+  will-change: transform, opacity;
+}
+.cs-toast.cs-toast-leaving {
+  animation: cs-toast-out 0.25s cubic-bezier(0.4, 0, 1, 0.5) forwards;
+}
+@keyframes cs-toast-in {
+  from { transform: translateX(120%) scale(0.98); opacity: 0; }
+  to   { transform: translateX(0) scale(1); opacity: 1; }
+}
+@keyframes cs-toast-out {
+  to { transform: translateX(120%) scale(0.98); opacity: 0; }
+}
+.cs-toast-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: var(--cs-success);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.cs-toast-icon svg {
+  width: 18px;
+  height: 18px;
+  stroke: white;
+  stroke-width: 3;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.cs-toast-text {
+  flex: 1;
+  min-width: 0;
+}
+.cs-toast-text strong {
+  display: block;
+  color: var(--cs-text) !important;
+  font-weight: 600;
+  font-size: 13.5px;
+  margin: 0 0 2px;
+  letter-spacing: -0.005em;
+}
+.cs-toast-text small {
+  display: block;
+  font-size: 12px;
+  color: var(--cs-muted) !important;
+  font-weight: 400;
+  line-height: 1.4;
+}
+.cs-toast-text code {
+  background: var(--cs-accent-soft) !important;
+  color: var(--cs-accent) !important;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace !important;
+  font-size: 11px !important;
+  border: none !important;
+  font-weight: 500;
+}
+.cs-toast-close {
+  background: transparent;
+  border: none;
+  color: var(--cs-faint) !important;
+  cursor: pointer;
+  padding: 4px;
+  margin: -4px -4px -4px 0;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+.cs-toast-close:hover {
+  background: var(--cs-subtle) !important;
+  color: var(--cs-text) !important;
+}
+.cs-toast-close svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  display: block;
+}
+
+/* Make the file output look more clickable (visual affordance) */
+[data-testid="file"] a,
+.gr-file a,
+[class*="file-preview"] a {
+  cursor: pointer !important;
+  transition: background 0.15s ease;
+}
+[data-testid="file"] a:hover,
+.gr-file a:hover,
+[class*="file-preview"] a:hover {
+  background: var(--cs-accent-soft) !important;
+}
+
+/* Make the "Guardado en" pill in the status clickable */
+.cs-status-saved {
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.cs-status-saved:hover {
+  background: var(--cs-accent) !important;
+  color: white !important;
+  border-color: var(--cs-accent) !important;
+}
+.cs-status-saved:hover code {
+  color: white !important;
+}
+
+/* =========================================================
  *  HIDE GRADIO'S OWN PROGRESS INDICATORS
  *  Per-component "processing | X.Xs" diamond icon + ETA text
  *  looks chaotic. We show our own loading state instead.

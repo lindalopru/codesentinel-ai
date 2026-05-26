@@ -542,6 +542,16 @@ def build_ui() -> gr.Blocks:
     'loading.title':          { es: 'Analizando código…',       en: 'Analyzing code…' },
     'loading.body':           { es: 'El modelo está revisando tu código. Esto puede tardar 10–60 segundos.',
                                 en: 'The model is analyzing your code. This may take 10–60 seconds.' },
+
+    /* toast notifications */
+    'toast.download.title':   { es: 'Descarga iniciada',
+                                en: 'Download started' },
+    'toast.download.body':    { es: 'El reporte también está guardado en tu carpeta Descargas.',
+                                en: 'The report is also saved to your Downloads folder.' },
+    'toast.saved.title':      { es: 'Reporte guardado',
+                                en: 'Report saved' },
+    'toast.saved.body':       { es: 'Encuéntralo en tu carpeta Descargas.',
+                                en: 'Find it in your Downloads folder.' },
   };
 
   /* =================================================================
@@ -747,15 +757,75 @@ def build_ui() -> gr.Blocks:
     }
   };
 
+  /* =================================================================
+   *  Toast / snackbar — declared early so applyAll can call it
+   * ================================================================= */
+  let _toastContainer = null;
+  function showToast(titleKey, bodyKey, filename) {
+    if (!_toastContainer) {
+      _toastContainer = document.createElement('div');
+      _toastContainer.className = 'cs-toast-container';
+      document.body.appendChild(_toastContainer);
+    }
+    const t = (STRINGS[titleKey] && STRINGS[titleKey][lang]) || titleKey;
+    const b = (STRINGS[bodyKey]  && STRINGS[bodyKey][lang])  || bodyKey;
+    const safeName = (filename || '').replace(/[<>]/g, '');
+    const fnameHtml = safeName ? `<br/><code>~/Downloads/${safeName}</code>` : '';
+    const toast = document.createElement('div');
+    toast.className = 'cs-toast';
+    toast.innerHTML = `
+      <div class='cs-toast-icon'>
+        <svg viewBox='0 0 24 24'><polyline points='20 6 9 17 4 12'/></svg>
+      </div>
+      <div class='cs-toast-text'>
+        <strong>${t}</strong>
+        <small>${b}${fnameHtml}</small>
+      </div>
+      <button class='cs-toast-close' type='button' aria-label='Close'>
+        <svg viewBox='0 0 24 24'><line x1='18' y1='6' x2='6' y2='18'/><line x1='6' y1='6' x2='18' y2='18'/></svg>
+      </button>
+    `;
+    _toastContainer.appendChild(toast);
+    const remove = () => {
+      toast.classList.add('cs-toast-leaving');
+      setTimeout(() => toast.remove(), 280);
+    };
+    toast.querySelector('.cs-toast-close').addEventListener('click', remove);
+    setTimeout(remove, 4500);
+  }
+
+  function wireDownloads(root) {
+    root = root || document.body;
+    /* gr.File download link */
+    root.querySelectorAll('[data-testid="file"] a, .gr-file a, [class*="file-preview"] a, [id*="report"] a').forEach((a) => {
+      if (a.dataset.csToastBound) return;
+      a.dataset.csToastBound = '1';
+      a.addEventListener('click', () => {
+        const href = a.getAttribute('href') || '';
+        const fname = (href.split('?')[0] || '').split('/').pop() || '';
+        showToast('toast.download.title', 'toast.download.body', fname);
+      });
+    });
+    /* Status "Guardado en …" pill */
+    root.querySelectorAll('.cs-status-saved').forEach((el) => {
+      if (el.dataset.csToastBound) return;
+      el.dataset.csToastBound = '1';
+      el.addEventListener('click', () => {
+        const code = el.querySelector('code');
+        const fname = code ? (code.textContent || '').replace(/^~\/Downloads\//, '').trim() : '';
+        showToast('toast.saved.title', 'toast.saved.body', fname);
+      });
+    });
+  }
+
   const applyAll = () => {
     document.documentElement.setAttribute('data-lang', lang);
     applyI18nElements();
     applyGradioLabels();
     applyStatus();
     syncOutputLang();
+    wireDownloads();
   };
-
-  applyAll();
 
   /* =================================================================
    *  Wire toggle buttons (retry until they exist — Gradio renders async)
