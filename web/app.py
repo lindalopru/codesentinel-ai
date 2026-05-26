@@ -361,8 +361,17 @@ def review_uploaded_file(
     path = Path(file_obj.name)
     engine = _resolve_engine(model)
     result = engine.review_file(path, use_static=use_static, output_language=_norm_lang(out_lang))
-    if language and language != "auto":
+
+    # Show just the filename, not Gradio's ugly tempfile path
+    # (`/private/var/folders/.../gradio/<hash>/foo.py` -> `foo.py`).
+    result.file_path = path.name
+
+    # For uploaded files, the extension is the source of truth. The "Lenguaje
+    # del código" dropdown only overrides when detection failed (unknown
+    # extension) AND the user picked a specific language.
+    if result.language == "unknown" and language and language != "auto":
         result.language = language
+
     result = result.filter_by_severity(Severity(min_sev))
     md_path = _save_md_report(result)
     n = len(result.findings)
@@ -989,7 +998,8 @@ def build_ui() -> gr.Blocks:
             lang_dd = gr.Dropdown(
                 choices=LANGUAGE_CHOICES,
                 value="auto",
-                label="Lenguaje del código",
+                label="Lenguaje (al pegar)",
+                info="Para uploads se autodetecta del archivo",
             )
             out_lang_tb = gr.Dropdown(
                 choices=["es", "en"],
