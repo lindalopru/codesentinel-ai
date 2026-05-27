@@ -98,6 +98,10 @@ Cloud code reviewers (CodeRabbit, Copilot for PRs, Cursor Review) ship your sour
 
 ## Documentation
 
+📄 **[Final Project Report (Word)](docs/CodeSentinel_Final_Report.docx)** — the complete, submission-ready report covering every rubric section.
+
+Supplementary technical notes:
+
 - [01 — Project report](docs/01_report.md)
 - [02 — Requirements](docs/02_requirements.md)
 - [03 — Architecture](docs/03_architecture.md)
